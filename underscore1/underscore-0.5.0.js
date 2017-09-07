@@ -216,12 +216,19 @@
     }), 'value');
   };
 
-  // Use a comparator function to figure out at what index an object should
-  // be inserted so as to maintain order. Uses binary search.
+  // 使用二分查找确定 obj 在 array 中的位置序号
+  // obj 按照此序号插入能保证 array 原有的排序
+  // 如果提供 iterator 函数，iterator 将作为 array 排序的依据
+  // _.sortedIndex(array, obj, [interator])
   _.sortedIndex = function(array, obj, iterator) {
     iterator = iterator || _.identity;
     var low = 0, high = array.length;
+    // 二分查找法
     while (low < high) {
+      // >> 1 右移运算符，可以理解为 mid = parseInt((low + high)/2) 2的1次方
+      // >> 2 右移运算符 a >> 2 === parseInt(a / (2*2)) 2 的平方
+      // << 1 左移运算符 a << 1 === a * (2*1)
+      // << 2 左移运算符 a << 2 === a * (2*2)
       var mid = (low + high) >> 1;
       iterator(array[mid]) < iterator(obj) ? low = mid + 1 : high = mid;
     }

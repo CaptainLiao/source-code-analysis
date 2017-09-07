@@ -4,4 +4,17 @@
     return _.map(obj, function(value) {
       return (method ? value[method] : value).apply(value, args);
     });
+	};
+	
+
+	  // Use a comparator function to figure out at what index an object should
+  // be inserted so as to maintain order. Uses binary search.
+  _.sortedIndex = function(array, obj, iterator) {
+    iterator = iterator || _.identity;
+    var low = 0, high = array.length;
+    while (low < high) {
+      var mid = (low + high) >> 1;
+      iterator(array[mid]) < iterator(obj) ? low = mid + 1 : high = mid;
+    }
+    return low;
   };
