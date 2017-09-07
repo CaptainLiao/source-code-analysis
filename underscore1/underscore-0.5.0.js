@@ -93,7 +93,7 @@
     return memo;
   };
 
-  // 遍历对象，返回第一个 iterator 函数判断为 true 的值
+  // 返回第一个 iterator 函数判断为 true 的值
   _.detect = function(obj, iterator, context) {
     var result;
     _.each(obj, function(value, index, list) {
@@ -105,8 +105,8 @@
     return result;
   };
 
-  // Return all the elements that pass a truth test. Use JavaScript 1.6's
-  // filter(), if it exists.
+  // 返回所有 iterator 判断为 true 的元素数组
+  // 如果存在 fileter 方法，直接使用并return
   _.select = function(obj, iterator, context) {
     if (obj.filter) return obj.filter(iterator, context);
     var results = [];
@@ -116,7 +116,8 @@
     return results;
   };
 
-  // Return all the elements for which a truth test fails.
+  // 返回所有 iterator 判断为 false 的元素数组
+  // 与 _.select 相反
   _.reject = function(obj, iterator, context) {
     var results = [];
     _.each(obj, function(value, index, list) {
@@ -125,8 +126,10 @@
     return results;
   };
 
-  // Determine whether all of the elements match a truth test. Delegate to
-  // JavaScript 1.6's every(), if it is present.
+  // 返回一个布尔值
+  // 所有元素都为真时，结果为 true，否则为 false
+  // 相当于 JS V1.6 的 every 方法
+  // _.identity 为默认的迭代器函数，不做任何操作直接返回第一个参数（value）
   _.all = function(obj, iterator, context) {
     iterator = iterator || _.identity;
     if (obj.every) return obj.every(iterator, context);
@@ -137,8 +140,9 @@
     return result;
   };
 
-  // Determine if at least one element in the object matches a truth test. Use
-  // JavaScript 1.6's some(), if it exists.
+  // 返回一个布尔值
+  // 当有任意元素为真时，结果为 true，否则为 false
+  // 如果对象本身存在 some 方法，直接使用并 return
   _.any = function(obj, iterator, context) {
     iterator = iterator || _.identity;
     if (obj.some) return obj.some(iterator, context);
@@ -149,8 +153,9 @@
     return result;
   };
 
-  // Determine if a given value is included in the array or object,
-  // based on '==='.
+  // 返回布尔值
+  // 判断给定的 target 是否包含在 obj（数组或对象） 中
+  // 使用 “===” 
   _.include = function(obj, target) {
     if (_.isArray(obj)) return _.indexOf(obj, target) != -1;
     var found = false;
@@ -160,7 +165,7 @@
     return found;
   };
 
-  // Invoke a method with arguments on every item in a collection.
+  // 对集合中的每一项注册方法，arguments作为方法参数
   _.invoke = function(obj, method) {
     var args = _.rest(arguments, 2);
     return _.map(obj, function(value) {
@@ -168,12 +173,13 @@
     });
   };
 
-  // Convenience version of a common use case of map: fetching a property.
+  // 返回一个数组
+  // 方便使用 map 提取集合中的某个/组属性
   _.pluck = function(obj, key) {
     return _.map(obj, function(value){ return value[key]; });
   };
 
-  // Return the maximum item or (item-based computation).
+  // 返回一个最大值
   _.max = function(obj, iterator, context) {
     if (!iterator && _.isArray(obj)) return Math.max.apply(Math, obj);
     var result = {computed : -Infinity};
@@ -184,7 +190,7 @@
     return result.value;
   };
 
-  // Return the minimum element (or element-based computation).
+  // 返回一个最小值
   _.min = function(obj, iterator, context) {
     if (!iterator && _.isArray(obj)) return Math.min.apply(Math, obj);
     var result = {computed : Infinity};
@@ -195,7 +201,9 @@
     return result.value;
   };
 
-  // Sort the object's values by a criteria produced by an iterator.
+  // 使用 iterator 返回的值（criteria）对 obj 的值（value）进行排序
+  // 返回排序后的对象的值的数组
+  // _.map 返回一个数组，接着使用 _sort 排序，最后使用 _.pluck 提取出 value 作为数组返回
   _.sortBy = function(obj, iterator, context) {
     return _.pluck(_.map(obj, function(value, index, list) {
       return {
@@ -488,7 +496,7 @@
     };
   });
 
-  /* -------------------------- Utility Functions: -------------------------- */
+  /* -------------------------- 工具函数 -------------------------- */
 
   // Run Underscore.js in noConflict mode, returning the '_' variable to its
   // previous owner. Returns a reference to the Underscore object.
@@ -498,6 +506,7 @@
   };
 
   // Keep the identity function around for default iterators.
+  // 指定一个默认的迭代器函数
   _.identity = function(value) {
     return value;
   };
