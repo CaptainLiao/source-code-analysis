@@ -6,14 +6,19 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Document</title>
   <script src="../underscore-0.5.0.js"></script>
+
 </head>
 <body>
   <script>
-    console.log(_.sortedIndex)  
-    var stooges = [{name: 'moe', age: 30}, {name: 'curly', age: 60}];
-    var a = _.sortedIndex(stooges, {name: 'larry', age: 30}, function(obj) {return obj.age});
+
     var b = [2,[4,55],[[223]],5,22];
-    console.log(_.without(_.flatten(b), 55))
+    var f = _(b)
+             .chain()
+             .flatten()
+             .without(b,55)
+             .value()
+
+    console.log(f)
   </script>
 </body>
 </html>

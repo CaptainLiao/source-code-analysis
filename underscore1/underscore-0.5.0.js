@@ -20,7 +20,7 @@
   // can be used OO-style. 
   // 如果 Underscore 作为函数来调用，则返回一个面向对象风格的 wrapped 对象。
   // wrapper 函数作为原型链，持有underscore 的所有功能/方法
-  var wrapper = function(obj) { this._wrapped = obj; };
+  var wrapper = function(obj) { this._wrapped = obj;};
 
   // 定义breaker，作为跳出循环遍历的值。
   var breaker = typeof StopIteration !== 'undefined' ? StopIteration : '__break__';
@@ -577,12 +577,28 @@
   _.tail     = _.rest;
   _.methods  = _.functions;
 
-  /*------------------------ Setup the OOP Wrapper: --------------------------*/
+  /*------------------------ 创建面向对象的 Wrapper 构造器 --------------------------*/
 
-  // 辅助函数，使得 underscore 可以对结果进行链式调用
+  /**
+   * 链式调用的使用方法
+   * var a = [2,[33,21],55,9,21]
+   * var f = _(a).chain().flatten().without(a, 55).value();
+   * 第一步：_(obj)                  创建一个wrapper 实例
+   * 第二步：.chain()                开始链式调用
+   * 第三步：.flatten().without()    链式方法
+   * 第四部：.value()                中断调用，提取出结果值
+   */
+
+  /**
+   * 辅助函数，使得 underscore 可以对结果进行链式调用
+   * @param {Object/Array} obj 需要操作的对象或数组
+   * @param {Boolean} chain 如果为真，就可以对 obj 进行链式调用
+   */
   var result = function(obj, chain) {
-    // _(obj) 实例化一个 wapper 对象，这个实例对象的 this._wrapper = obj;
+    // _(obj) 实例化一个 wapper 对象，这个实例对象的 this._wrapped = obj;
     //  _(obj).chain() 返回 this ；this 指向 _(obj) 实例化的 wapper 对象
+    // var (w = _(obj)) === new wrapper(obj); // w 是 wrapper 构造函数的一个实例
+    // w.chain() ; // 返回 this ，this -> w;
     return chain ? _(obj).chain() : obj;
   };
 
@@ -593,12 +609,15 @@
     // 给 wrapper 的原型上添加方法
     wrapper.prototype[name] = function() {
       // 将 this._wrapped 对象放在 arguments 数组的首位
+      // this._wrapped 就是需要操作的对象或数组
       Array.prototype.unshift.call(arguments, this._wrapped);
+      
       return result(_[name].apply(_, arguments), this._chain);
     };
   });
 
   // 将所有数组原生方法添加到 wrapper 对象上
+  // 以下方法会改变原始数组
   _.each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function(name) {
     wrapper.prototype[name] = function() {
       Array.prototype[name].apply(this._wrapped, arguments);
@@ -606,22 +625,26 @@
     };
   });
 
-  // Add all accessor Array functions to the wrapper.
+  // 以下方法返回新的数组，原始数组不会改变
   _.each(['concat', 'join', 'slice'], function(name) {
     wrapper.prototype[name] = function() {
       return result(Array.prototype[name].apply(this._wrapped, arguments), this._chain);
     };
   });
 
-  // Start chaining a wrapped Underscore object.
+  // 链式调用从这里开始
+  // 第一步：_(obj)       创建一个wrapper 实例记为w, 
+  // 第二步：w.chain()    开始链式调用
   wrapper.prototype.chain = function() {
+    // this._chain 为true，则允许链式调用
     this._chain = true;
+    // 返回实例对象 w，这是链式调用最为关键的一步
     return this;
   };
 
-  // Extracts the result from a wrapped and chained object.
+  // 最后一步：中断链式调用，并取出结果
   wrapper.prototype.value = function() {
     return this._wrapped;
   };
-
+ 
 })();
