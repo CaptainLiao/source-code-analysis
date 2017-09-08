@@ -18,3 +18,14 @@
     }
     return low;
   };
+
+
+  _.uniq = function(array, isSorted) {
+    return _.reduce(array, [], function(memo, el, i) {
+      var m = (isSorted ? _.last(memo) != el : !_.include(memo, el));
+      if (0 == i || m ) {
+        memo.push(el);
+      }
+      return memo;
+    });
+  };

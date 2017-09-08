@@ -45,11 +45,16 @@
   _.each = function(obj, iterator, context) {
     var index = 0;
     try {
-      if (obj.forEach) {
+      // 如果对象有forEach 方法，就使用原生方法
+      if (obj.forEach) {  
         obj.forEach(iterator, context);
-      } else if (obj.length) {
+      }
+      // 如果对象有 length 属性，则按照数组进行遍历 
+      else if (obj.length) {
         for (var i=0, l=obj.length; i<l; i++) iterator.call(context, obj[i], i, obj);
-      } else {
+      } 
+      // 遍历对象
+      else {
         var keys = _.keys(obj), l = keys.length;
         for (var i=0; i<l; i++) iterator.call(context, obj[keys[i]], keys[i], obj);
       }
@@ -72,9 +77,9 @@
   };
 
   // reduce，聚合obj对象的值并返回一个结果值
-  // 若可能，直接使用 JS v1.8 原生 reduce 方法。
-  // 否则，使用 _.each 遍历对象，
+  // @memo       {Array}      用于初始化
   // @iterator   {Function}   聚合函数：previousValue，nextValue,currentIndex, array
+  // @context    {Object}     绑定 iterator 的this指向
   _.reduce = function(obj, memo, iterator, context) {
     if (obj && obj.reduce) return obj.reduce(_.bind(iterator, context), memo);
     _.each(obj, function(value, index, list) {
@@ -216,7 +221,7 @@
     }), 'value');
   };
 
-  // 使用二分查找确定 obj 在 array 中的位置序号
+  // 使用二分查找确定 obj 在 array(有序数组) 中的位置序号
   // obj 按照此序号插入能保证 array 原有的排序
   // 如果提供 iterator 函数，iterator 将作为 array 排序的依据
   // _.sortedIndex(array, obj, [interator])
@@ -230,12 +235,15 @@
       // << 1 左移运算符 a << 1 === a * (2*1)
       // << 2 左移运算符 a << 2 === a * (2*2)
       var mid = (low + high) >> 1;
+      // 二分查找的关键
+      // iterator(array[mid]) < iterator(obj)，则只比较 mid 左侧的数组，继续循环，反之亦然
+      // 每次都将数组分成两部分，结果只取1/2，这就是二分查找
       iterator(array[mid]) < iterator(obj) ? low = mid + 1 : high = mid;
     }
     return low;
   };
 
-  // Convert anything iterable into a real, live array.
+  // 将任何可迭代对象转化为数组
   _.toArray = function(iterable) {
     if (!iterable)           return [];
     if (iterable.toArray)    return iterable.toArray();
@@ -243,37 +251,37 @@
     return _.map(iterable, function(val){ return val; });
   };
 
-  // Return the number of elements in an object.
+  // 返回对象的元素个数
   _.size = function(obj) {
     return _.toArray(obj).length;
   };
 
-  /*-------------------------- Array Functions: ------------------------------*/
+  /*-------------------------- 数组方法 ------------------------------*/
 
-  // Get the first element of an array. Passing "n" will return the first N
-  // values in the array. Aliased as "head".
+  // 返回数组中的第一个元素，如果有参数 n，返回第一个到第 n 个元素组成的新数组。
+  // 别名：head
   _.first = function(array, n) {
     return n ? Array.prototype.slice.call(array, 0, n) : array[0];
   };
 
-  // Returns everything but the first entry of the array. Aliased as "tail".
-  // Especially useful on the arguments object. Passing an "index" will return
-  // the rest of the values in the array from that index onward.
+  // 返回除第一个元素以外的所有内容，别名：tail（尾巴）
+  // 指定 index ，返回从 index 开始后的所有内容
   _.rest = function(array, index) {
     return Array.prototype.slice.call(array, _.isUndefined(index) ? 1 : index);
   };
 
-  // Get the last element of an array.
+  // Get 最后一个数组元素
   _.last = function(array) {
     return array[array.length - 1];
   };
 
-  // Trim out all falsy values from an array.
+  // 去掉所有值为 false 的元素
+  // compact：紧凑、简洁
   _.compact = function(array) {
     return _.select(array, function(value){ return !!value; });
   };
 
-  // Return a completely flattened version of an array.
+  // 将嵌套多层的数组变成一维数组
   _.flatten = function(array) {
     return _.reduce(array, [], function(memo, value) {
       if (_.isArray(value)) return memo.concat(_.flatten(value));
@@ -282,14 +290,14 @@
     });
   };
 
-  // Return a version of the array that does not contain the specified value(s).
+  // 返回不包含指定值（可指定多个）的新数组
   _.without = function(array) {
     var values = _.rest(arguments);
     return _.select(array, function(value){ return !_.include(values, value); });
   };
 
-  // Produce a duplicate-free version of the array. If the array has already
-  // been sorted, you have the option of using a faster algorithm.
+  // 数组去重，返回新的数组
+  // 如果数组经过排序，即isSorted 为真，就用更快的算法进行
   _.uniq = function(array, isSorted) {
     return _.reduce(array, [], function(memo, el, i) {
       if (0 == i || (isSorted ? _.last(memo) != el : !_.include(memo, el))) memo.push(el);
@@ -297,9 +305,9 @@
     });
   };
 
-  // Produce an array that contains every item shared between all the
-  // passed-in arrays.
+  // 返回多个数组的交集
   _.intersect = function(array) {
+    // 返回除 array 外的 arguments
     var rest = _.rest(arguments);
     return _.select(_.uniq(array), function(item) {
       return _.all(rest, function(other) {
@@ -435,30 +443,33 @@
     return _.extend({}, obj);
   };
 
-  // Perform a deep comparison to check if two objects are equal.
+  // 深度比较两个对象是否相等
   _.isEqual = function(a, b) {
-    // Check object identity.
+    // === 类型和值都相等
     if (a === b) return true;
-    // Different types?
+    // 比较不同类型的值
     var atype = typeof(a), btype = typeof(b);
     if (atype != btype) return false;
-    // Basic equality test (watch out for coercions).
+    // 基本相等，注意有强制转换
     if (a == b) return true;
-    // One of them implements an isEqual()?
+    // 其中一个实现了 isEqual 方法
     if (a.isEqual) return a.isEqual(b);
-    // Check dates' integer values.
+    // 比较日期，转化成整形后再比较
     if (_.isDate(a) && _.isDate(b)) return a.getTime() === b.getTime();
-    // Both are NaN?
+    // 都是 NaN，其实 NaN !== NaN;
     if (_.isNaN(a) && _.isNaN(b)) return true;
-    // Compare regular expressions.
+    // 比较两个正则表达式
     if (_.isRegExp(a) && _.isRegExp(b))
       return a.source     === b.source &&
              a.global     === b.global &&
              a.ignoreCase === b.ignoreCase &&
              a.multiline  === b.multiline;
-    // If a is not an object by this point, we can't handle it.
+
+    // 到这里，如果检查到 a 不是对象，我们就不能进行下面的操作，直接返回false
     if (atype !== 'object') return false;
-    // Check for different array lengths before comparing contents.
+
+    // 比较数组
+    // 在比较内容前，先检查数组长度
     if (a.length && (a.length !== b.length)) return false;
     // Nothing else worked, deep compare the contents.
     var aKeys = _.keys(a), bKeys = _.keys(b);
@@ -469,23 +480,24 @@
     return true;
   };
 
-  // Is a given array or object empty?
+  // 数组或对象是是否为空
   _.isEmpty = function(obj) {
     return _.keys(obj).length == 0;
   };
 
-  // Is a given value a DOM element?
+  // 是否为 DOM 元素
   _.isElement = function(obj) {
     return !!(obj && obj.nodeType == 1);
   };
 
-  // Is the given value NaN -- this one is interesting. NaN != NaN, and
-  // isNaN(undefined) == true, so we make sure it's a number first.
+  // 判断给定的值是否是 NaN
+  // 注意 NaN !== NaN，isNaN(undefined) == true;
+  // 所以在使用 isNaN() 之前，要确定给定的值是否为数字
   _.isNaN = function(obj) {
     return _.isNumber(obj) && isNaN(obj);
   };
 
-  // Is a given value equal to null?
+  // 是否为空 null
   _.isNull = function(obj) {
     return obj === null;
   };
@@ -512,26 +524,25 @@
     return this;
   };
 
-  // Keep the identity function around for default iterators.
   // 指定一个默认的迭代器函数
   _.identity = function(value) {
     return value;
   };
 
-  // Break out of the middle of an iteration.
+  // 跳出迭代循环
   _.breakLoop = function() {
     throw breaker;
   };
 
   // Generate a unique integer id (unique within the entire client session).
-  // Useful for temporary DOM ids.
+  // 对临时的 DOM id 很有用
   var idCounter = 0;
   _.uniqueId = function(prefix) {
     var id = idCounter++;
     return prefix ? prefix + id : id;
   };
 
-  // Return a sorted list of the function names available in Underscore.
+  // 返回对象里的所有经过排序后的方法名
   _.functions = function(obj) {
     return _.select(_.keys(obj), function(key){ return _.isFunction(obj[key]); }).sort();
   };
@@ -568,20 +579,26 @@
 
   /*------------------------ Setup the OOP Wrapper: --------------------------*/
 
-  // Helper function to continue chaining intermediate results.
+  // 辅助函数，使得 underscore 可以对结果进行链式调用
   var result = function(obj, chain) {
+    // _(obj) 实例化一个 wapper 对象，这个实例对象的 this._wrapper = obj;
+    //  _(obj).chain() 返回 this ；this 指向 _(obj) 实例化的 wapper 对象
     return chain ? _(obj).chain() : obj;
   };
 
-  // Add all of the Underscore functions to the wrapper object.
+
+  // 将 Underscore 的所有函数添加到 warpper 对象上。
+  // _.functions(_) 取得 _ 对象上的所有函数名，返回一个数组，遍历这个数组
   _.each(_.functions(_), function(name) {
+    // 给 wrapper 的原型上添加方法
     wrapper.prototype[name] = function() {
+      // 将 this._wrapped 对象放在 arguments 数组的首位
       Array.prototype.unshift.call(arguments, this._wrapped);
       return result(_[name].apply(_, arguments), this._chain);
     };
   });
 
-  // Add all mutator Array functions to the wrapper.
+  // 将所有数组原生方法添加到 wrapper 对象上
   _.each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function(name) {
     wrapper.prototype[name] = function() {
       Array.prototype[name].apply(this._wrapped, arguments);

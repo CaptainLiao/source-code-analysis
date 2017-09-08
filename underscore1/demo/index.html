@@ -12,7 +12,8 @@
     console.log(_.sortedIndex)  
     var stooges = [{name: 'moe', age: 30}, {name: 'curly', age: 60}];
     var a = _.sortedIndex(stooges, {name: 'larry', age: 30}, function(obj) {return obj.age});
-    console.log(a)
+    var b = [2,[4,55],[[223]],5,22];
+    console.log(_.without(_.flatten(b), 55))
   </script>
 </body>
 </html>
