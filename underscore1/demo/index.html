@@ -19,6 +19,20 @@
              .value()
 
     console.log(f)
+
+    if(window.HMLHttpRequest) {
+      request = new XMLHttpRequest();
+    } else if (window.ActiveXObject) {
+      try{
+        request = new ActiveXObject('Microsoft.XMLHTTP');
+      } catch(e) {
+        throw e;
+      }
+    }
+
+    request.open('GET', url);
+    request.send(null);
+
   </script>
 </body>
 </html>

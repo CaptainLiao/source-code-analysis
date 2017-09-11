@@ -79,4 +79,12 @@
   };
   console.log(m)
 
+  __.bind = function(func, context) {
+    var slice = Array.prototype.slice;
+    var args = __.rest(2, arguments);
+    return function() {
+      return func.apply(context, args.concat(slice.call(arguments)))
+    }
+  }
+
 })()
