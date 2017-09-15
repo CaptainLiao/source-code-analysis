@@ -10,29 +10,18 @@
 </head>
 <body>
   <script>
-
-    var b = [2,[4,55],[[223]],5,22];
-    var f = _(b)
-             .chain()
-             .flatten()
-             .without(b,55)
-             .value()
-
-    console.log(f)
-
-    if(window.HMLHttpRequest) {
-      request = new XMLHttpRequest();
-    } else if (window.ActiveXObject) {
-      try{
-        request = new ActiveXObject('Microsoft.XMLHTTP');
-      } catch(e) {
-        throw e;
+    function Person(){}
+    Person.prototype = {
+      set(value) {
+        this.value = value;
+        return this;
+      },
+      get() {
+        return this.value * 2;
       }
     }
-
-    request.open('GET', url);
-    request.send(null);
-
+    var person = new Person();
+    console.log(person.set(10).get())
   </script>
 </body>
 </html>

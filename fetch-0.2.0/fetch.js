@@ -154,10 +154,11 @@
 
   function isObject(value) {
     try {
-      // 返回指定对象的原型
+      // 返回 value 的原型
+      // 等同于 Object.prototype.toString.call(value) === '[object Object]'
       return Object.getPrototypeOf(value) === Object.prototype
     } catch (ex) {
-      // Probably a string literal.
+      // 如果 value 为 null 或 undefined ，会报错，这里catch 一下
       return false
     }
   }
