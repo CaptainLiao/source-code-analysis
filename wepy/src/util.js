@@ -212,12 +212,13 @@ export default {
 
         proto = Object.getPrototypeOf( obj );
 
-        // Objects with no prototype (e.g., `Object.create( null )`) are plain
+        // 没有原型的对象是一个 plain (e.g., `Object.create( null )`)
         if ( !proto ) {
             return true;
         }
 
         // Objects with prototype are plain iff they were constructed by a global Object function
+        // 直接由全局 Object() 函数创建的对象，是一个 plain 对象（POJO）
         Ctor = Object.prototype.hasOwnProperty.call( proto, 'constructor' ) && proto.constructor;
         return typeof Ctor === 'function' && Object.prototype.hasOwnProperty.toString.call( Ctor ) === Object.prototype.hasOwnProperty.toString.call(Object);
     },

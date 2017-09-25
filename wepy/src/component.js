@@ -410,6 +410,7 @@ export default class {
         }
     }
 
+    // 执行一些代码，并手动触发赃值检测
     $apply (fn) {
         if (typeof(fn) === 'function') {
             fn.call(this);
@@ -423,6 +424,7 @@ export default class {
         }
     }
 
+    // 赃值检测
     $digest () {
         let k;
         let originData = this.$data;
