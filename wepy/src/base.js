@@ -105,6 +105,14 @@ export default {
         });
         return config;
     },
+    
+    /**
+     * 创建页面
+     * 
+     * @param {Function} pageClass page类（page构造函数）
+     * @param {String} pagePath     page路径
+     * @returns config
+     */
     $createPage (pageClass, pagePath) {
         let self = this;
         let config = {}, k;
