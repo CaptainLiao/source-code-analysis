@@ -26,6 +26,18 @@ export default class extends component {
         super.onLoad();
     }
 
+    
+    /**
+     * 给下一个页面预加载数据
+     * page1
+     * this.$preload('userName': 'Gcaufy');
+     * this.$redirect('./page2');
+     * 
+     * page2
+     * onLoad(params, data){console.log(data.preload.userName)}
+     * @param {any} key 
+     * @param {any} data 
+     */
     $preload(key, data) {
         if (typeof(key) === 'object') {
             let k;
