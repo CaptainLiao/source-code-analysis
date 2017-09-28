@@ -74,6 +74,14 @@ export default class {
         }
     }
 
+    
+    /**
+     * 全局拦截器
+     * 可拦截所有 wx API
+     * 
+     * @param {String} api eg: request\setStorage
+     * @param {Object} provider 用于配置拦截到的API 的 config、success等方法
+     */
     intercept (api, provider) {
         this.$interceptors[api] = provider;
     }
@@ -135,7 +143,7 @@ export default class {
                                         return;
                                     }
                                 }
-                                // 否则，将结果赋值给形参 obj 
+                                // 只要执行了拦截器的config方法，都将结果赋值给形参 obj 
                                 obj = rst;
                             }
                             // 遇到 request 方法，调整形参 obj
