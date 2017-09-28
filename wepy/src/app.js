@@ -115,7 +115,7 @@ export default class {
             }
         }
         // 遍历wx对象中的所有key，拷贝给形参 wepy
-        // 若 key 是同步的，或是noPromiseMethods对象的属性，或带有'on'前缀，通过定义native对象为中间值，再赋值给形参 wepy，结束！！
+        // 若 key 是同步的，或是noPromiseMethods对象的属性，或带有'on'前缀，直接赋值给 wepy，结束！！
         // 否则将方法的形参obj经过拦截器转化，执行下面两个分支
         // 1' 若 obj 是字符串，返回 wx[key](obj)
         // 2' 否则，执行拦截器中 key 属性的success、faile、complete 方法，再执行 wx[key](obj)
@@ -157,8 +157,8 @@ export default class {
                                 return wx[key](obj);
                             }
 
-                            // 若 obj 不是字符串，且中间件有 promisify 属性
-                            // 则返回一个 pormise 对象
+                            // 若用户在use方法中使用了 promisify 
+                            // 则对所有 API 进行 promisify 化
                             if (self.$addons.promisify) {
                                 return new Promise((resolve, reject) => {
                                     let bak = {};

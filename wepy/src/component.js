@@ -3,27 +3,27 @@ import util from './util';
 
 
 const Props = {
-    check (t, val) {
+    check(t, val) {
         switch (t) {
             case String:
-                return typeof(val) === 'string';
+                return typeof (val) === 'string';
             case Number:
-                return typeof(val) === 'number';
+                return typeof (val) === 'number';
             case Boolean:
-                return typeof(val) === 'boolean';
+                return typeof (val) === 'boolean';
             case Function:
-                return typeof(val) === 'function';
+                return typeof (val) === 'function';
             case Object:
-                return typeof(val) === 'object';
+                return typeof (val) === 'object';
             case Array:
                 return toString.call(val) === '[object Array]';
             default:
                 return val instanceof t;
         }
     },
-    build (props) {
+    build(props) {
         let rst = {};
-        if (typeof(props) === 'string') {
+        if (typeof (props) === 'string') {
             rst[props] = {};
         } else if (toString.call(props) === '[object Array]') {
             props.forEach((p) => {
@@ -31,7 +31,7 @@ const Props = {
             });
         } else {
             Object.keys(props).forEach(p => {
-                if (typeof(props[p]) === 'function') {
+                if (typeof (props[p]) === 'function') {
                     rst[p] = {
                         type: [props[p]]
                     }
@@ -48,7 +48,7 @@ const Props = {
         }
         return rst;
     },
-    valid (props, key, val) {
+    valid(props, key, val) {
         let valid = false;
         if (props[key]) {
             if (!props[key].type) {
@@ -59,11 +59,11 @@ const Props = {
         }
         return valid;
     },
-    getValue (props, key, value) {
+    getValue(props, key, value) {
         var rst;
         if (value !== undefined && this.valid(props, key, value)) {
             rst = value;
-        } else if (typeof(props[key].default) === 'function') {
+        } else if (typeof (props[key].default) === 'function') {
             rst = props[key].default();
         } else
             rst = props[key].default;
@@ -71,20 +71,41 @@ const Props = {
     }
 };
 
+// es6 导出一个组件基类，定义wepy框架的基本api
+// page.js、app.js 等都继承这个类
 export default class {
+    // 定义一系列变量和方法，$ 前缀表示私有
+    // this 关键字代表实例对象
+    // 没有显示声明一个构造方法 constructor()，但系统会默认一个空的构造方法
 
+    // 子组件列表
     $com = {};
+    
+    // 混合列表
     $mixins = [];
 
     $isComponent = true;
+
+    // 定义需要添加的前缀
     $prefix = '';
 
+    // 需要映射的 props 属性集
     $mappingProps = {};
 
+    // 组件数据集
     data = {};
+
     methods = {};
 
-    $init ($wxpage, $root, $parent) {
+    
+    /**
+     * 组件的初始化操作，所有
+     * 
+     * @param {any} $wxpage 
+     * @param {any} $root 
+     * @param {any} $parent 
+     */
+    $init($wxpage, $root, $parent) {
         let self = this;
 
         this.$wxpage = $wxpage;
@@ -103,7 +124,8 @@ export default class {
 
         let props = this.props;
         let key, val, binded;
-        let inRepeat = false, repeatKey;
+        let inRepeat = false,
+            repeatKey;
 
 
         // save a init data.
@@ -132,16 +154,17 @@ export default class {
                     val = $parent.$props[this.$name][key];
                     binded = $parent.$props[this.$name][`v-bind:${key}.once`] || $parent.$props[this.$name][`v-bind:${key}.sync`];
                     if (binded) {
-                        if (typeof(binded) === 'object') {
+                        if (typeof (binded) === 'object') {
                             props[key].repeat = binded.for;
                             props[key].item = binded.item;
                             props[key].index = binded.index;
                             props[key].key = binded.key;
                             props[key].value = binded.value;
-                            
+
                             inRepeat = true;
 
-                            let bindfor = binded.for, binddata = $parent;
+                            let bindfor = binded.for,
+                                binddata = $parent;
                             bindfor.split('.').forEach(t => {
                                 binddata = binddata[t];
                             });
@@ -206,9 +229,9 @@ export default class {
         }
     }
 
-    $initMixins () {
+    $initMixins() {
         if (this.mixins) {
-            if (typeof(this.mixins) === 'function') {
+            if (typeof (this.mixins) === 'function') {
                 this.mixins = [this.mixins];
             }
         } else {
@@ -221,11 +244,10 @@ export default class {
         });
     }
 
-    onLoad () {
-    }
+    onLoad() {}
 
-    setData (k, v) {
-        if (typeof(k) === 'string') {
+    setData(k, v) {
+        if (typeof (k) === 'string') {
             if (v) {
                 let tmp = {};
                 tmp[k] = v;
@@ -237,7 +259,8 @@ export default class {
             }
             return this.$wxpage.setData(k);
         }
-        let t = null, reg = new RegExp('^' + this.$prefix.replace(/\$/g, '\\$'), 'ig');
+        let t = null,
+            reg = new RegExp('^' + this.$prefix.replace(/\$/g, '\\$'), 'ig');
         for (t in k) {
             let noPrefix = t.replace(reg, '');
             this.$data[noPrefix] = util.$copy(k[t], true);
@@ -245,18 +268,18 @@ export default class {
         return this.$wxpage.setData(k);
     }
 
-    getWxPage () {
+    getWxPage() {
         return this.$wxpage;
     }
 
-    getCurrentPages () {
+    getCurrentPages() {
         return this.$wxpage.getCurrentPages();
     }
 
     /**
      * 对于在repeat中的组件，index改变时需要修改对应的数据
      */
-    $setIndex (index) {
+    $setIndex(index) {
         this.$index = index;
 
         let props = this.props,
@@ -269,8 +292,9 @@ export default class {
                     val = $parent.$props[this.$name][key];
                     binded = $parent.$props[this.$name][`v-bind:${key}.once`] || $parent.$props[this.$name][`v-bind:${key}.sync`];
                     if (binded) {
-                        if (typeof(binded) === 'object') {
-                            let bindfor = binded.for, binddata = $parent;
+                        if (typeof (binded) === 'object') {
+                            let bindfor = binded.for,
+                                binddata = $parent;
                             bindfor.split('.').forEach(t => {
                                 binddata = binddata[t];
                             });
@@ -303,7 +327,7 @@ export default class {
     }
 
     $getComponent(com) {
-        if (typeof(com) === 'string') {
+        if (typeof (com) === 'string') {
             if (com.indexOf('/') === -1) {
                 return this.$com[com];
             } else if (com === '/') {
@@ -312,7 +336,7 @@ export default class {
                 let path = com.split('/');
                 path.forEach((s, i) => {
                     if (i === 0) {
-                        if (s === '') {   //   /a/b/c
+                        if (s === '') { //   /a/b/c
                             com = this.$root;
                         } else if (s === '.') {
                             // ./a/b/c
@@ -329,10 +353,10 @@ export default class {
                 });
             }
         }
-        return (typeof(com) !== 'object') ? null : com;
+        return (typeof (com) !== 'object') ? null : com;
     }
 
-    $invoke (com, method, ...args) {
+    $invoke(com, method, ...args) {
         com = this.$getComponent(com);
 
         if (!com) {
@@ -341,7 +365,7 @@ export default class {
 
         let fn = com.methods ? com.methods[method] : '';
 
-        if (typeof(fn) === 'function') {
+        if (typeof (fn) === 'function') {
             let $evt = new event('', this, 'invoke');
             let rst = fn.apply(com, args.concat($evt));
             com.$apply();
@@ -350,19 +374,19 @@ export default class {
             fn = com[method];
         }
 
-        if (typeof(fn) === 'function') {
+        if (typeof (fn) === 'function') {
             return fn.apply(com, args);
         } else {
             throw new Error('Invalid method: ' + method);
         }
     }
 
-    $broadcast (evtName, ...args) {
+    $broadcast(evtName, ...args) {
         let com = this;
-        let $evt = typeof(evtName) === 'string' ? new event(evtName, this, 'broadcast') : $evt;
+        let $evt = typeof (evtName) === 'string' ? new event(evtName, this, 'broadcast') : $evt;
         let queue = [com];
 
-        while(queue.length && $evt.active) {
+        while (queue.length && $evt.active) {
             let current = queue.shift();
             for (let c in current.$com) {
                 c = current.$com[c];
@@ -379,7 +403,7 @@ export default class {
         }
     }
 
-    $emit (evtName, ...args) {
+    $emit(evtName, ...args) {
         let com = this;
         let source = this;
         let $evt = new event(evtName, source, 'emit');
@@ -389,7 +413,7 @@ export default class {
             let method = this.$parent.$events[this.$name]['v-on:' + evtName];
             if (method && this.$parent.methods) {
                 let fn = this.$parent.methods[method];
-                if (typeof(fn) === 'function') {
+                if (typeof (fn) === 'function') {
                     this.$parent.$apply(() => {
                         fn.apply(this.$parent, args.concat($evt));
                     });
@@ -399,7 +423,7 @@ export default class {
                 }
             }
         }
-        while(com && com.$isComponent !== undefined && $evt.active) {
+        while (com && com.$isComponent !== undefined && $evt.active) {
             // 保存 com 块级作用域组件实例
             let comContext = com;
             let fn = getEventsFn(comContext, evtName);
@@ -411,8 +435,8 @@ export default class {
     }
 
     // 执行一些代码，并手动触发赃值检测
-    $apply (fn) {
-        if (typeof(fn) === 'function') {
+    $apply(fn) {
+        if (typeof (fn) === 'function') {
             fn.call(this);
             this.$apply();
         } else {
@@ -425,7 +449,7 @@ export default class {
     }
 
     // 赃值检测
-    $digest () {
+    $digest() {
         let k;
         let originData = this.$data;
         this.$$phase = '$digest';
@@ -433,7 +457,8 @@ export default class {
             let readyToSet = {};
             if (this.computed) {
                 for (k in this.computed) { // If there are computed property, calculated every times
-                    let fn = this.computed[k], val = fn.call(this);
+                    let fn = this.computed[k],
+                        val = fn.call(this);
                     if (!util.$isEqual(this[k], val)) { // Value changed, then send to ReadyToSet
                         readyToSet[this.$prefix + k] = val;
                         this[k] = util.$copy(val, true);
@@ -453,13 +478,13 @@ export default class {
                         }
                     }
                     // Send to ReadyToSet
-                    readyToSet[this.$prefix + k] = this[k]; 
+                    readyToSet[this.$prefix + k] = this[k];
                     this.data[k] = this[k];
                     originData[k] = util.$copy(this[k], true);
                     if (this.$mappingProps[k]) {
                         Object.keys(this.$mappingProps[k]).forEach((changed) => {
                             let mapping = this.$mappingProps[k][changed];
-                            if (typeof(mapping) === 'object') {
+                            if (typeof (mapping) === 'object') {
                                 this.$parent.$apply();
                             } else if (changed === 'parent' && !util.$isEqual(this.$parent.$data[mapping], this[k])) {
                                 this.$parent[mapping] = this[k];
@@ -483,14 +508,14 @@ export default class {
 
 }
 
-function getEventsFn (comContext, evtName) {
+function getEventsFn(comContext, evtName) {
     let fn = comContext.events ? comContext.events[evtName] : undefined;
-    const typeFn = typeof(fn);
+    const typeFn = typeof (fn);
     let fnFn;
     if (typeFn === 'string') {
         // 如果 events[k] 是 string 类型 则认为是调用 methods 上方法
         const method = comContext.methods && comContext.methods[fn];
-        if (typeof(method) === 'function') {
+        if (typeof (method) === 'function') {
             fnFn = method;
         }
     } else if (typeFn === 'function') {
