@@ -179,6 +179,7 @@ export default class {
                             };
                         } else {
                             val = $parent[binded];
+                            // 双向绑定
                             if (props[key].twoWay) {
                                 if (!this.$mappingProps[key]) this.$mappingProps[key] = {};
                                 this.$mappingProps[key]['parent'] = binded;
