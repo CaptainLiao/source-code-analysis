@@ -1,4 +1,8 @@
 # mutter by myself
+
+### 2017-10-11更新
+在vue中集成typescript：https://alexjoverm.github.io/2017/06/28/Integrate-TypeScript-in-your-Vue-project/
+
 最近一直在思考一个问题——如何持续的提高编程能力（特指前端）？
 
 众所周知，前端入门比较简单，大部分实际工作过一年左右的人，都能够够较好的完成业务代码。我所认为一年左右的合格前端，需要具备以下技能：
