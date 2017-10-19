@@ -29,6 +29,7 @@ ejs = (function(){
   require.register = function (path, fn){
       require.modules[path] = fn;
     };
+
     
   require.relative = function (parent) {
       return function(p){
