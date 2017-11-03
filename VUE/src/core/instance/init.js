@@ -13,7 +13,10 @@ import { extend, mergeOptions, formatComponentName } from '../util/index'
 let uid = 0
 
 export function initMixin (Vue: Class<Component>) {
+
+  // _init 方法做了什么？
   Vue.prototype._init = function (options?: Object) {
+    // vm 指向this
     const vm: Component = this
     // a uid
     vm._uid = uid++
@@ -29,13 +32,17 @@ export function initMixin (Vue: Class<Component>) {
     // a flag to avoid this being observed
     vm._isVue = true
     // merge options
+    // 在我们的例子中，options._isComponent 不存在，跳转到 else 分支
     if (options && options._isComponent) {
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
       initInternalComponent(vm, options)
     } else {
+      // 给vm 挂载一个 $options属性，用来保存merge后的参数
       vm.$options = mergeOptions(
+        // vm.constructor 就是 function Vue(){}
+        // 
         resolveConstructorOptions(vm.constructor),
         options || {},
         vm
@@ -88,8 +95,16 @@ function initInternalComponent (vm: Component, options: InternalComponentOptions
   }
 }
 
+/**
+ * 
+ * @param {Vue} Ctor 
+ * return Vue 构造方法中的 options
+ */
 export function resolveConstructorOptions (Ctor: Class<Component>) {
+  // options = Vue.options，Vue 构造方法有哪些 options 呢？
+  // tips：回想一下 initGlobalAPI() 方法都做了什么
   let options = Ctor.options
+
   if (Ctor.super) {
     const superOptions = resolveConstructorOptions(Ctor.super)
     const cachedSuperOptions = Ctor.superOptions
