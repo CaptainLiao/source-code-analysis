@@ -2,6 +2,12 @@ ejs = (function(){
   
   // CommonJS require()
   
+  /**
+   * 实现 CommonJS require() 方法
+   * 
+   * @param {String} 文件路径 
+   * @returns object
+   */
   function require(p){
       if ('fs' == p) return {};
       if ('path' == p) return {};
@@ -15,8 +21,14 @@ ejs = (function(){
       return mod.exports;
     }
   
+  // modules对象，以路径名为 key
   require.modules = {};
   
+  /**
+   * 给文件 path 添加后缀
+   * 
+   * @returns path 
+   */
   require.resolve = function (path){
       var orig = path
         , reg = path + '.js'
@@ -30,7 +42,7 @@ ejs = (function(){
       require.modules[path] = fn;
     };
 
-    
+
   require.relative = function (parent) {
       return function(p){
         if ('.' != p.substr(0, 1)) return require(p);
