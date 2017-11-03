@@ -2,8 +2,20 @@
 
 import { makeMap } from 'shared/util'
 
+// these are reserved for web because they are directly compiled away
+// during template compilation
+export const isReservedAttr = makeMap('style,class')
+
 // attributes that should be using props for binding
-export const mustUseProp = makeMap('value,selected,checked,muted')
+const acceptValue = makeMap('input,textarea,option,select,progress')
+export const mustUseProp = (tag: string, type: ?string, attr: string): boolean => {
+  return (
+    (attr === 'value' && acceptValue(tag)) && type !== 'button' ||
+    (attr === 'selected' && tag === 'option') ||
+    (attr === 'checked' && tag === 'input') ||
+    (attr === 'muted' && tag === 'video')
+  )
+}
 
 export const isEnumeratedAttr = makeMap('contenteditable,draggable,spellcheck')
 
@@ -15,39 +27,6 @@ export const isBooleanAttr = makeMap(
   'required,reversed,scoped,seamless,selected,sortable,translate,' +
   'truespeed,typemustmatch,visible'
 )
-
-const isAttr = makeMap(
-  'accept,accept-charset,accesskey,action,align,alt,async,autocomplete,' +
-  'autofocus,autoplay,autosave,bgcolor,border,buffered,challenge,charset,' +
-  'checked,cite,class,code,codebase,color,cols,colspan,content,http-equiv,' +
-  'name,contenteditable,contextmenu,controls,coords,data,datetime,default,' +
-  'defer,dir,dirname,disabled,download,draggable,dropzone,enctype,method,for,' +
-  'form,formaction,headers,<th>,height,hidden,high,href,hreflang,http-equiv,' +
-  'icon,id,ismap,itemprop,keytype,kind,label,lang,language,list,loop,low,' +
-  'manifest,max,maxlength,media,method,GET,POST,min,multiple,email,file,' +
-  'muted,name,novalidate,open,optimum,pattern,ping,placeholder,poster,' +
-  'preload,radiogroup,readonly,rel,required,reversed,rows,rowspan,sandbox,' +
-  'scope,scoped,seamless,selected,shape,size,type,text,password,sizes,span,' +
-  'spellcheck,src,srcdoc,srclang,srcset,start,step,style,summary,tabindex,' +
-  'target,title,type,usemap,value,width,wrap'
-)
-
-/* istanbul ignore next */
-const isRenderableAttr = (name: string): boolean => {
-  return (
-    isAttr(name) ||
-    name.indexOf('data-') === 0 ||
-    name.indexOf('aria-') === 0
-  )
-}
-export { isRenderableAttr }
-
-export const propsToAttrMap = {
-  acceptCharset: 'accept-charset',
-  className: 'class',
-  htmlFor: 'for',
-  httpEquiv: 'http-equiv'
-}
 
 export const xlinkNS = 'http://www.w3.org/1999/xlink'
 

@@ -1,55 +1,116 @@
 /* @flow */
 
 import RenderStream from './render-stream'
-import { createRenderFunction } from './render'
-import { warn } from 'core/util/debug'
 import { createWriteFunction } from './write'
+import { createRenderFunction } from './render'
+import { createPromiseCallback } from './util'
+import TemplateRenderer from './template-renderer/index'
+import type { ClientManifest } from './template-renderer/index'
+
+export type Renderer = {
+  renderToString: (component: Component, context: any, cb: any) => ?Promise<string>;
+  renderToStream: (component: Component, context?: Object) => stream$Readable;
+};
+
+type RenderCache = {
+  get: (key: string, cb?: Function) => string | void;
+  set: (key: string, val: string) => void;
+  has?: (key: string, cb?: Function) => boolean | void;
+};
+
+export type RenderOptions = {
+  modules?: Array<(vnode: VNode) => ?string>;
+  directives?: Object;
+  isUnaryTag?: Function;
+  cache?: RenderCache;
+  template?: string;
+  inject?: boolean;
+  basedir?: string;
+  shouldPreload?: Function;
+  shouldPrefetch?: Function;
+  clientManifest?: ClientManifest;
+  runInNewContext?: boolean | 'once';
+};
 
 export function createRenderer ({
   modules = [],
   directives = {},
   isUnaryTag = (() => false),
-  cache
-}: {
-  modules: Array<Function>,
-  directives: Object,
-  isUnaryTag: Function,
-  cache: ?Object
-} = {}): {
-  renderToString: Function,
-  renderToStream: Function
-} {
-  if (process.env.VUE_ENV !== 'server') {
-    warn(
-      'You are using createRenderer without setting VUE_ENV enviroment variable to "server". ' +
-      'It is recommended to set VUE_ENV=server this will help rendering performance, ' +
-      'by turning data observation off.'
-    )
-  }
+  template,
+  inject,
+  cache,
+  shouldPreload,
+  shouldPrefetch,
+  clientManifest
+}: RenderOptions = {}): Renderer {
   const render = createRenderFunction(modules, directives, isUnaryTag, cache)
+  const templateRenderer = new TemplateRenderer({
+    template,
+    inject,
+    shouldPreload,
+    shouldPrefetch,
+    clientManifest
+  })
 
   return {
     renderToString (
       component: Component,
-      done: (err: ?Error, res: ?string) => any
-    ): void {
+      context: any,
+      cb: any
+    ): ?Promise<string> {
+      if (typeof context === 'function') {
+        cb = context
+        context = {}
+      }
+      if (context) {
+        templateRenderer.bindRenderFns(context)
+      }
+
+      // no callback, return Promise
+      let promise
+      if (!cb) {
+        ({ promise, cb } = createPromiseCallback())
+      }
+
       let result = ''
       const write = createWriteFunction(text => {
         result += text
-      }, done)
+        return false
+      }, cb)
       try {
-        render(component, write, () => {
-          done(null, result)
+        render(component, write, context, () => {
+          if (template) {
+            result = templateRenderer.renderSync(result, context)
+          }
+          cb(null, result)
         })
       } catch (e) {
-        done(e)
+        cb(e)
       }
+
+      return promise
     },
 
-    renderToStream (component: Component): RenderStream {
-      return new RenderStream((write, done) => {
-        render(component, write, done)
+    renderToStream (
+      component: Component,
+      context?: Object
+    ): stream$Readable {
+      if (context) {
+        templateRenderer.bindRenderFns(context)
+      }
+      const renderStream = new RenderStream((write, done) => {
+        render(component, write, context, done)
       })
+      if (!template) {
+        return renderStream
+      } else {
+        const templateStream = templateRenderer.createStream(context)
+        renderStream.on('error', err => {
+          templateStream.emit('error', err)
+        })
+        renderStream.pipe(templateStream)
+        return templateStream
+      }
     }
   }
 }

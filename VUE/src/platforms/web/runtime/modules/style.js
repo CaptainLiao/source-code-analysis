@@ -1,63 +1,88 @@
 /* @flow */
 
-import { cached, extend, camelize, toObject } from 'shared/util'
+import { getStyle, normalizeStyleBinding } from 'web/util/style'
+import { cached, camelize, extend, isDef, isUndef } from 'shared/util'
 
-const prefixes = ['Webkit', 'Moz', 'ms']
+const cssVarRE = /^--/
+const importantRE = /\s*!important$/
+const setProp = (el, name, val) => {
+  /* istanbul ignore if */
+  if (cssVarRE.test(name)) {
+    el.style.setProperty(name, val)
+  } else if (importantRE.test(val)) {
+    el.style.setProperty(name, val.replace(importantRE, ''), 'important')
+  } else {
+    const normalizedName = normalize(name)
+    if (Array.isArray(val)) {
+      // Support values array created by autoprefixer, e.g.
+      // {display: ["-webkit-box", "-ms-flexbox", "flex"]}
+      // Set them one by one, and the browser will only set those it can recognize
+      for (let i = 0, len = val.length; i < len; i++) {
+        el.style[normalizedName] = val[i]
+      }
+    } else {
+      el.style[normalizedName] = val
+    }
+  }
+}
 
-let testEl
+const vendorNames = ['Webkit', 'Moz', 'ms']
+
+let emptyStyle
 const normalize = cached(function (prop) {
-  testEl = testEl || document.createElement('div')
+  emptyStyle = emptyStyle || document.createElement('div').style
   prop = camelize(prop)
-  if (prop !== 'filter' && (prop in testEl.style)) {
+  if (prop !== 'filter' && (prop in emptyStyle)) {
     return prop
   }
-  const upper = prop.charAt(0).toUpperCase() + prop.slice(1)
-  for (let i = 0; i < prefixes.length; i++) {
-    const prefixed = prefixes[i] + upper
-    if (prefixed in testEl.style) {
-      return prefixed
+  const capName = prop.charAt(0).toUpperCase() + prop.slice(1)
+  for (let i = 0; i < vendorNames.length; i++) {
+    const name = vendorNames[i] + capName
+    if (name in emptyStyle) {
+      return name
     }
   }
 })
 
 function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
-  if ((!oldVnode.data || !oldVnode.data.style) && !vnode.data.style) {
+  const data = vnode.data
+  const oldData = oldVnode.data
+
+  if (isUndef(data.staticStyle) && isUndef(data.style) &&
+    isUndef(oldData.staticStyle) && isUndef(oldData.style)
+  ) {
     return
   }
+
   let cur, name
   const el: any = vnode.elm
-  const oldStyle: any = oldVnode.data.style || {}
-  let style: any = vnode.data.style || {}
+  const oldStaticStyle: any = oldData.staticStyle
+  const oldStyleBinding: any = oldData.normalizedStyle || oldData.style || {}
 
-  // handle string
-  if (typeof style === 'string') {
-    el.style.cssText = style
-    return
-  }
+  // if static style exists, stylebinding already merged into it when doing normalizeStyleData
+  const oldStyle = oldStaticStyle || oldStyleBinding
 
-  const needClone = style.__ob__
+  const style = normalizeStyleBinding(vnode.data.style) || {}
 
-  // handle array syntax
-  if (Array.isArray(style)) {
-    style = vnode.data.style = toObject(style)
-  }
+  // store normalized style under a different key for next diff
+  // make sure to clone it if it's reactive, since the user likely wants
+  // to mutate it.
+  vnode.data.normalizedStyle = isDef(style.__ob__)
+    ? extend({}, style)
+    : style
 
-  // clone the style for future updates,
-  // in case the user mutates the style object in-place.
-  if (needClone) {
-    style = vnode.data.style = extend({}, style)
-  }
+  const newStyle = getStyle(vnode, true)
 
   for (name in oldStyle) {
-    if (!style[name]) {
-      el.style[normalize(name)] = ''
+    if (isUndef(newStyle[name])) {
+      setProp(el, name, '')
     }
   }
-  for (name in style) {
-    cur = style[name]
+  for (name in newStyle) {
+    cur = newStyle[name]
     if (cur !== oldStyle[name]) {
       // ie9 setting to null has no effect, must use empty string
-      el.style[normalize(name)] = cur == null ? '' : cur
+      setProp(el, name, cur == null ? '' : cur)
     }
   }
 }

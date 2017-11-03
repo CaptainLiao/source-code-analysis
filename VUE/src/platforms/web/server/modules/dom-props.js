@@ -2,22 +2,38 @@
 
 import VNode from 'core/vdom/vnode'
 import { renderAttr } from './attrs'
-import { propsToAttrMap, isRenderableAttr } from 'web/util/attrs'
+import { isDef, isUndef, extend } from 'shared/util'
+import { propsToAttrMap, isRenderableAttr } from '../util'
 
-export default function (node: VNodeWithData): string {
-  const props = node.data.domProps
+export default function renderDOMProps (node: VNodeWithData): string {
+  let props = node.data.domProps
   let res = ''
-  if (props) {
-    for (const key in props) {
-      if (key === 'innerHTML') {
-        setText(node, props[key], true)
-      } else if (key === 'textContent') {
-        setText(node, props[key])
-      } else {
-        const attr = propsToAttrMap[key] || key.toLowerCase()
-        if (isRenderableAttr(attr)) {
-          res += renderAttr(attr, props[key])
-        }
+
+  let parent = node.parent
+  while (isDef(parent)) {
+    if (parent.data && parent.data.domProps) {
+      props = extend(extend({}, props), parent.data.domProps)
+    }
+    parent = parent.parent
+  }
+
+  if (isUndef(props)) {
+    return res
+  }
+
+  const attrs = node.data.attrs
+  for (const key in props) {
+    if (key === 'innerHTML') {
+      setText(node, props[key], true)
+    } else if (key === 'textContent') {
+      setText(node, props[key], false)
+    } else {
+      const attr = propsToAttrMap[key] || key.toLowerCase()
+      if (isRenderableAttr(attr) &&
+        // avoid rendering double-bound props/attrs twice
+        !(isDef(attrs) && isDef(attrs[attr]))
+      ) {
+        res += renderAttr(attr, props[key])
       }
     }
   }

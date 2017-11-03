@@ -1,28 +1,38 @@
 /* @flow */
 
-import { no, noop } from 'shared/util'
+import {
+  no,
+  noop,
+  identity
+} from 'shared/util'
+
+import { LIFECYCLE_HOOKS } from 'shared/constants'
 
 export type Config = {
   // user
   optionMergeStrategies: { [key: string]: Function };
   silent: boolean;
+  productionTip: boolean;
+  performance: boolean;
   devtools: boolean;
-  errorHandler: ?Function;
-  ignoredElements: ?Array<string>;
-  keyCodes: { [key: string]: number };
+  errorHandler: ?(err: Error, vm: Component, info: string) => void;
+  warnHandler: ?(msg: string, vm: Component, trace: string) => void;
+  ignoredElements: Array<string | RegExp>;
+  keyCodes: { [key: string]: number | Array<number> };
+
   // platform
   isReservedTag: (x?: string) => boolean;
+  isReservedAttr: (x?: string) => boolean;
+  parsePlatformTagName: (x: string) => string;
   isUnknownElement: (x?: string) => boolean;
   getTagNamespace: (x?: string) => string | void;
-  mustUseProp: (x?: string) => boolean;
-  // internal
-  _assetTypes: Array<string>;
-  _lifecycleHooks: Array<string>;
-  _maxUpdateCount: number;
-  _isServer: boolean;
-}
+  mustUseProp: (tag: string, type: ?string, name: string) => boolean;
 
-const config: Config = {
+  // legacy
+  _lifecycleHooks: Array<string>;
+};
+
+export default ({
   /**
    * Option merge strategies (used in core/util/options)
    */
@@ -34,9 +44,19 @@ const config: Config = {
   silent: false,
 
   /**
+   * Show production mode tip message on boot?
+   */
+  productionTip: process.env.NODE_ENV !== 'production',
+
+  /**
    * Whether to enable devtools
    */
   devtools: process.env.NODE_ENV !== 'production',
+
+  /**
+   * Whether to record perf
+   */
+  performance: false,
 
   /**
    * Error handler for watcher errors
@@ -44,9 +64,14 @@ const config: Config = {
   errorHandler: null,
 
   /**
+   * Warn handler for watcher warns
+   */
+  warnHandler: null,
+
+  /**
    * Ignore certain custom elements
    */
-  ignoredElements: null,
+  ignoredElements: [],
 
   /**
    * Custom user key aliases for v-on
@@ -60,6 +85,12 @@ const config: Config = {
   isReservedTag: no,
 
   /**
+   * Check if an attribute is reserved so that it cannot be used as a component
+   * prop. This is platform-dependent and may be overwritten.
+   */
+  isReservedAttr: no,
+
+  /**
    * Check if a tag is an unknown element.
    * Platform-dependent.
    */
@@ -71,45 +102,18 @@ const config: Config = {
   getTagNamespace: noop,
 
   /**
+   * Parse the real tag name for the specific platform.
+   */
+  parsePlatformTagName: identity,
+
+  /**
    * Check if an attribute must be bound using property, e.g. value
    * Platform-dependent.
    */
   mustUseProp: no,
 
   /**
-   * List of asset types that a component can own.
+   * Exposed for legacy reasons
    */
-  _assetTypes: [
-    'component',
-    'directive',
-    'filter'
-  ],
-
-  /**
-   * List of lifecycle hooks.
-   */
-  _lifecycleHooks: [
-    'beforeCreate',
-    'created',
-    'beforeMount',
-    'mounted',
-    'beforeUpdate',
-    'updated',
-    'beforeDestroy',
-    'destroyed',
-    'activated',
-    'deactivated'
-  ],
-
-  /**
-   * Max circular updates allowed in a scheduler flush cycle.
-   */
-  _maxUpdateCount: 100,
-
-  /**
-   * Server rendering?
-   */
-  _isServer: process.env.VUE_ENV === 'server'
-}
-
-export default config
+  _lifecycleHooks: LIFECYCLE_HOOKS
+}: Config)

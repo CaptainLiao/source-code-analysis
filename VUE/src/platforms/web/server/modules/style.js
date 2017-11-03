@@ -1,25 +1,28 @@
 /* @flow */
 
-import { hyphenate, toObject } from 'shared/util'
+import { escape } from '../util'
+import { hyphenate } from 'shared/util'
+import { getStyle } from 'web/util/style'
 
-export default function renderStyle (node: VNodeWithData): ?string {
-  const staticStyle = node.data.attrs && node.data.attrs.style
-  if (node.data.style || staticStyle) {
-    let styles = node.data.style
-    let res = ''
-    if (styles) {
-      if (typeof styles === 'string') {
-        res += styles
-      } else {
-        if (Array.isArray(styles)) {
-          styles = toObject(styles)
-        }
-        for (const key in styles) {
-          res += `${hyphenate(key)}:${styles[key]};`
-        }
-        res += staticStyle || ''
+export function genStyle (style: Object): string {
+  let styleText = ''
+  for (const key in style) {
+    const value = style[key]
+    const hyphenatedKey = hyphenate(key)
+    if (Array.isArray(value)) {
+      for (let i = 0, len = value.length; i < len; i++) {
+        styleText += `${hyphenatedKey}:${value[i]};`
       }
+    } else {
+      styleText += `${hyphenatedKey}:${value};`
     }
-    return ` style=${JSON.stringify(res)}`
+  }
+  return styleText
+}
+
+export default function renderStyle (vnode: VNodeWithData): ?string {
+  const styleText = genStyle(getStyle(vnode, false))
+  if (styleText !== '') {
+    return ` style=${JSON.stringify(escape(styleText))}`
   }
 }

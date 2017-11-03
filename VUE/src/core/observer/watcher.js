@@ -1,15 +1,18 @@
 /* @flow */
 
-import config from '../config'
-import Dep, { pushTarget, popTarget } from './dep'
 import { queueWatcher } from './scheduler'
+import Dep, { pushTarget, popTarget } from './dep'
+
 import {
   warn,
   remove,
   isObject,
   parsePath,
-  _Set as Set
+  _Set as Set,
+  handleError
 } from '../util/index'
+
+import type { ISet } from '../util/index'
 
 let uid = 0
 
@@ -31,8 +34,8 @@ export default class Watcher {
   active: boolean;
   deps: Array<Dep>;
   newDeps: Array<Dep>;
-  depIds: Set;
-  newDepIds: Set;
+  depIds: ISet;
+  newDepIds: ISet;
   getter: Function;
   value: any;
 
@@ -40,16 +43,19 @@ export default class Watcher {
     vm: Component,
     expOrFn: string | Function,
     cb: Function,
-    options?: Object = {}
+    options?: Object
   ) {
     this.vm = vm
     vm._watchers.push(this)
     // options
-    this.deep = !!options.deep
-    this.user = !!options.user
-    this.lazy = !!options.lazy
-    this.sync = !!options.sync
-    this.expression = expOrFn.toString()
+    if (options) {
+      this.deep = !!options.deep
+      this.user = !!options.user
+      this.lazy = !!options.lazy
+      this.sync = !!options.sync
+    } else {
+      this.deep = this.user = this.lazy = this.sync = false
+    }
     this.cb = cb
     this.id = ++uid // uid for batching
     this.active = true
@@ -58,6 +64,9 @@ export default class Watcher {
     this.newDeps = []
     this.depIds = new Set()
     this.newDepIds = new Set()
+    this.expression = process.env.NODE_ENV !== 'production'
+      ? expOrFn.toString()
+      : ''
     // parse expression for getter
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn
@@ -83,14 +92,25 @@ export default class Watcher {
    */
   get () {
     pushTarget(this)
-    const value = this.getter.call(this.vm, this.vm)
-    // "touch" every property so they are all tracked as
-    // dependencies for deep watching
-    if (this.deep) {
-      traverse(value)
+    let value
+    const vm = this.vm
+    try {
+      value = this.getter.call(vm, vm)
+    } catch (e) {
+      if (this.user) {
+        handleError(e, vm, `getter for watcher "${this.expression}"`)
+      } else {
+        throw e
+      }
+    } finally {
+      // "touch" every property so they are all tracked as
+      // dependencies for deep watching
+      if (this.deep) {
+        traverse(value)
+      }
+      popTarget()
+      this.cleanupDeps()
     }
-    popTarget()
-    this.cleanupDeps()
     return value
   }
 
@@ -166,16 +186,7 @@ export default class Watcher {
           try {
             this.cb.call(this.vm, value, oldValue)
           } catch (e) {
-            process.env.NODE_ENV !== 'production' && warn(
-              `Error in watcher "${this.expression}"`,
-              this.vm
-            )
-            /* istanbul ignore else */
-            if (config.errorHandler) {
-              config.errorHandler.call(null, e, this.vm)
-            } else {
-              throw e
-            }
+            handleError(e, this.vm, `callback for watcher "${this.expression}"`)
           }
         } else {
           this.cb.call(this.vm, value, oldValue)
@@ -204,15 +215,14 @@ export default class Watcher {
   }
 
   /**
-   * Remove self from all dependencies' subcriber list.
+   * Remove self from all dependencies' subscriber list.
    */
   teardown () {
     if (this.active) {
       // remove self from vm's watcher list
       // this is a somewhat expensive operation so we skip it
-      // if the vm is being destroyed or is performing a v-for
-      // re-render (the watcher list is then filtered by v-for).
-      if (!this.vm._isBeingDestroyed && !this.vm._vForRemoving) {
+      // if the vm is being destroyed.
+      if (!this.vm._isBeingDestroyed) {
         remove(this.vm._watchers, this)
       }
       let i = this.deps.length
@@ -230,30 +240,30 @@ export default class Watcher {
  * is collected as a "deep" dependency.
  */
 const seenObjects = new Set()
-function traverse (val: any, seen?: Set) {
+function traverse (val: any) {
+  seenObjects.clear()
+  _traverse(val, seenObjects)
+}
+
+function _traverse (val: any, seen: ISet) {
   let i, keys
-  if (!seen) {
-    seen = seenObjects
-    seen.clear()
-  }
   const isA = Array.isArray(val)
-  const isO = isObject(val)
-  if ((isA || isO) && Object.isExtensible(val)) {
-    if (val.__ob__) {
-      const depId = val.__ob__.dep.id
-      if (seen.has(depId)) {
-        return
-      } else {
-        seen.add(depId)
-      }
+  if ((!isA && !isObject(val)) || !Object.isExtensible(val)) {
+    return
+  }
+  if (val.__ob__) {
+    const depId = val.__ob__.dep.id
+    if (seen.has(depId)) {
+      return
     }
-    if (isA) {
-      i = val.length
-      while (i--) traverse(val[i], seen)
-    } else if (isO) {
-      keys = Object.keys(val)
-      i = keys.length
-      while (i--) traverse(val[keys[i]], seen)
-    }
+    seen.add(depId)
+  }
+  if (isA) {
+    i = val.length
+    while (i--) _traverse(val[i], seen)
+  } else {
+    keys = Object.keys(val)
+    i = keys.length
+    while (i--) _traverse(val[keys[i]], seen)
   }
 }

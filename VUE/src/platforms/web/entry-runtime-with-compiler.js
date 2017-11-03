@@ -1,10 +1,13 @@
 /* @flow */
 
-import Vue from './web-runtime'
+import config from 'core/config'
 import { warn, cached } from 'core/util/index'
-import { query } from 'web/util/index'
-import { shouldDecodeTags, shouldDecodeNewlines } from 'web/util/compat'
-import { compileToFunctions } from 'web/compiler/index'
+import { mark, measure } from 'core/util/perf'
+
+import Vue from './runtime/index'
+import { query } from './util/index'
+import { shouldDecodeNewlines } from './util/compat'
+import { compileToFunctions } from './compiler/index'
 
 const idToTemplate = cached(id => {
   const el = query(id)
@@ -30,15 +33,19 @@ Vue.prototype.$mount = function (
   // resolve template/el and convert to render function
   if (!options.render) {
     let template = options.template
-    let isFromDOM = false
     if (template) {
       if (typeof template === 'string') {
         if (template.charAt(0) === '#') {
-          isFromDOM = true
           template = idToTemplate(template)
+          /* istanbul ignore if */
+          if (process.env.NODE_ENV !== 'production' && !template) {
+            warn(
+              `Template element not found or is empty: ${options.template}`,
+              this
+            )
+          }
         }
       } else if (template.nodeType) {
-        isFromDOM = true
         template = template.innerHTML
       } else {
         if (process.env.NODE_ENV !== 'production') {
@@ -47,19 +54,27 @@ Vue.prototype.$mount = function (
         return this
       }
     } else if (el) {
-      isFromDOM = true
       template = getOuterHTML(el)
     }
     if (template) {
+      /* istanbul ignore if */
+      if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
+        mark('compile')
+      }
+
       const { render, staticRenderFns } = compileToFunctions(template, {
-        warn,
-        isFromDOM,
-        shouldDecodeTags,
         shouldDecodeNewlines,
-        delimiters: options.delimiters
+        delimiters: options.delimiters,
+        comments: options.comments
       }, this)
       options.render = render
       options.staticRenderFns = staticRenderFns
+
+      /* istanbul ignore if */
+      if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
+        mark('compile end')
+        measure(`vue ${this._name} compile`, 'compile', 'compile end')
+      }
     }
   }
   return mount.call(this, el, hydrating)

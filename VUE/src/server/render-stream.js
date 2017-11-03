@@ -1,21 +1,22 @@
 /* @flow */
 
 /**
- * Original RenderStream implmentation by Sasha Aickin (@aickin)
+ * Original RenderStream implementation by Sasha Aickin (@aickin)
  * Licensed under the Apache License, Version 2.0
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Modified by Evan You (@yyx990803)
  */
 
-import stream from 'stream'
+const stream = require('stream')
+
+import { isTrue, isUndef } from 'shared/util'
 import { createWriteFunction } from './write'
 
 export default class RenderStream extends stream.Readable {
   buffer: string;
-  render: Function;
+  render: (write: Function, done: Function) => void;
   expectedSize: number;
-  stackDepth: number;
   write: Function;
   next: Function;
   end: Function;
@@ -26,7 +27,6 @@ export default class RenderStream extends stream.Readable {
     this.buffer = ''
     this.render = render
     this.expectedSize = 0
-    this.stackDepth = 0
 
     this.write = createWriteFunction((text, next) => {
       const n = this.expectedSize
@@ -36,6 +36,7 @@ export default class RenderStream extends stream.Readable {
         this.pushBySize(n)
         return true // we will decide when to call next
       }
+      return false
     }, err => {
       this.emit('error', err)
     })
@@ -74,7 +75,7 @@ export default class RenderStream extends stream.Readable {
     // it's possible that the last chunk added bumped the buffer up to > 2 * n,
     // which means we will need to go through multiple read calls to drain it
     // down to < n.
-    if (this.done) {
+    if (isTrue(this.done)) {
       this.push(null)
       return
     }
@@ -82,7 +83,7 @@ export default class RenderStream extends stream.Readable {
       this.pushBySize(n)
       return
     }
-    if (!this.next) {
+    if (isUndef(this.next)) {
       // start the rendering chain.
       this.tryRender()
     } else {
