@@ -42,14 +42,22 @@ export function initMixin (Vue: Class<Component>) {
       // 给vm 挂载一个 $options属性，用来保存merge后的参数
       vm.$options = mergeOptions(
         // vm.constructor 就是 function Vue(){}
-        // 
         resolveConstructorOptions(vm.constructor),
         options || {},
         vm
       )
+      // 合并后的 vm.$options
+      // vm.$options = {
+      //   components,
+      //   directives,
+      //   filters,
+      //   options,
+      //   vm
+      // }
     }
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
+      // 代理vm(this)
       initProxy(vm)
     } else {
       vm._renderProxy = vm
@@ -103,6 +111,12 @@ function initInternalComponent (vm: Component, options: InternalComponentOptions
 export function resolveConstructorOptions (Ctor: Class<Component>) {
   // options = Vue.options，Vue 构造方法有哪些 options 呢？
   // tips：回想一下 initGlobalAPI() 方法都做了什么
+
+  // Vue.options = {
+  //   components,
+  //   directives,
+  //   filters
+  // }
   let options = Ctor.options
 
   if (Ctor.super) {

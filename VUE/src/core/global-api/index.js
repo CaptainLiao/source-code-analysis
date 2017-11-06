@@ -44,7 +44,9 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   Vue.delete = del
   Vue.nextTick = nextTick
 
+
   Vue.options = Object.create(null)
+  // options 有三个属性.components, .directives, .filters
   ASSET_TYPES.forEach(type => {
     Vue.options[type + 's'] = Object.create(null)
   })
