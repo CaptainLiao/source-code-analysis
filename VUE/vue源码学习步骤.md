@@ -15,7 +15,7 @@
 ### 第一回 不入虎穴焉得虎子
 工欲善其事必先利其器，本次活捉`Vue`，最紧要的是找到它大概在哪里，然后根据线索顺藤摸瓜。
 
-`git clone https://github.com/vuejs/vue.git`，恭喜，`Vue`的老巢已经被你发现，令人激动的是，入口`package.json`也被你找到了。但紧闭的大门阻碍了你进攻的节奏，于是你运用所学姿势，很快找到破解大门的关键属性`scripts`：
+`git clone https://github.com/vuejs/vue.git`，恭喜，`Vue`的老巢已经被你发现，令人激动的是，入口`package.json`也被你找到了。但紧闭的大门阻碍了你的步伐，于是你运用所学姿势，很快找到破解大门的关键属性`scripts`：
 ````
   "scripts": {
     "dev": "rollup -w -c build/config.js --environment TARGET:web-full-dev",
@@ -66,9 +66,42 @@ module.exports = {
   }
 }         
 ````
-直到这里，`Vue`的庐山真面目依然没有揭开。“果然是狡兔三窟！”你轻哼道，但是你明白，已经越来越近了...此地唯一的入口就是`input`，小小的障眼法对你来讲不足挂齿，轻轻旋转机关，门开了——`src/platforms/web/entry-runtime-with-compiler.js`。只一眼，你就看到了`import Vue from './runtime/index'`。"hehe，总算把你逮住了，小东西！"。
+直到这里，`Vue`的庐山真面目依然没有揭开。“果然是狡兔三窟！”你轻哼道，但是你明白，已经越来越近了...此地唯一的入口就是`input`，小小的障眼法对你来讲不足挂齿，轻轻旋转机关，进入了`src/platforms/web/entry-runtime-with-compiler.js`。只一眼，你便看到了`import Vue from './runtime/index'`。"hehe，总算把你逮住了，小东西！"。
 
-### 第二回 智斗`Vue`及众门徒
+### 第二回 降服`Vue`
+你小心翼翼的推开`./runtime/index`，满心欢喜的以为终于抓到了`Vue`。突然，一支利箭飞来`import Vue from 'core/index'`，险险的避过后，`Vue`的一群门徒又蜂拥而至：
+````
+...
+Vue.config.mustUseProp = mustUseProp
+...
+extend(Vue.options.directives, platformDirectives)
+...
+Vue.prototype.$mount = function (
+  el?: string | Element,
+  hydrating?: boolean
+): Component {
+  el = el && inBrowser ? query(el) : undefined
+  return mountComponent(this, el, hydrating)
+}
+...
+````
+面对群魔乱舞，你开始受伤、流血，一波又一波的攻势逐渐让你体力不支，更糟糕的是，你，只是一个人。“就这样结束了么？”你喘着粗气暗问自己，往昔在脑海中一幕幕重现，从一无所知的小白到现在敢于挑战`Vue`，经历了重重历练，你不甘心，不甘心就这样失败。放手一搏吧，骚年！！！体内的能量在积累，终于，你用尽全力使出了终极必杀技：404 Page Not Found。一时间，门徒们应声而倒，墙上的利箭`core/index`发出“weng weng”的声响，化为齑粉飘散在空气中。巨大的威力连续将`./runtime/index`和`core/index`摧毁，只剩中心一间虚掩着房门的小屋`./instance/index`。
+
+你挣扎着走向`./instance/index`，推开门，`Vue`端坐在那里：
+````
+function Vue (options) {
+  if (process.env.NODE_ENV !== 'production' &&
+    !(this instanceof Vue)
+  ) {
+    warn('Vue is a constructor and should be called with the `new` keyword')
+  }
+  
+  this._init(options)
+}
+````
+此刻，你可以轻松的把它杀死，成为万众瞩目的英雄，于是乎你挥起手中利刃，直直的刺向`Vue`。当刃尖离`Vue`只有0.0001公分的时候，你看着眼前的`Vue`，原来，鼎鼎大名的`Vue`只是一个普普通通的构造函数，好像看到了最初的自己，刹那间，你顿住了。
+
+`Vue`却开口到：“骚年，我等你很久了！”
 
 
 
