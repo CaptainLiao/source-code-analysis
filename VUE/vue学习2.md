@@ -56,3 +56,4 @@ export function initMixin (Vue: Class<Component>) {
     }
   }
 ```
+
