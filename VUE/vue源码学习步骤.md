@@ -66,7 +66,7 @@ module.exports = {
   }
 }         
 ````
-直到这里，`Vue`的庐山真面目依然没有揭开。“果然是狡兔三窟！”你轻哼道，但是你明白，已经越来越近了...此地唯一的入口就是`input`，小小的障眼法对你来讲不足挂齿，轻轻旋转机关，进入了`src/platforms/web/entry-runtime-with-compiler.js`。只一眼，你便看到了`import Vue from './runtime/index'`。"hehe，总算把你逮住了，小东西！"。
+直到这里，`Vue`的庐山真面目依然没有揭开。“果然是狡兔三窟！”你轻哼道，但是你明白，已经越来越近了...此地唯一的入口就是`input`，小小的障眼法对你来讲不足挂齿，轻轻旋转机关，进入了`src/platforms/web/entry-runtime-with-compiler.js`。只一眼，你便看到了`import Vue from './runtime/index'`。"hehe，总算把你逮住了，老东西！"。
 
 ### 第二回 降服`Vue`
 你小心翼翼的推开`./runtime/index`，满心欢喜的以为终于抓到了`Vue`。突然，一支利箭飞来`import Vue from 'core/index'`，险险的避过后，`Vue`的一群门徒又蜂拥而至：
@@ -101,7 +101,7 @@ function Vue (options) {
 ````
 此刻，你可以轻松的把它杀死，成为万众瞩目的英雄，于是乎你挥起手中利刃，直直的刺向`Vue`。当刃尖离`Vue`只有0.0001公分的时候，你看着眼前的`Vue`，原来，鼎鼎大名的`Vue`只是一个普普通通的构造函数，好像看到了最初的自己，刹那间，你顿住了。
 
-`Vue`却开口到：“骚年，我等你很久了！”
+`Vue`却开口到：“骚年，你终于来了！”
 
 
 
