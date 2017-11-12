@@ -56,4 +56,39 @@ export function initMixin (Vue: Class<Component>) {
     }
   }
 ```
+完整的 `Vue` 对象
+````
+class Vue {
+  constructor(options) {
+    this.init(options)
+  }
 
+  static set() {} 
+  static delete() {} 
+  static nextTick() {}
+  static use() {}
+  static mixin() {}
+
+  _init() {}
+  $data() {}
+  $props() {}
+  $set() {}
+  $delete() {}
+  $watch() {}
+
+  $on() {}
+  $once() {}
+  $off() {}
+  $emit() {}
+
+  _update() {}
+  $forceUpdate() {}
+  $destroy() {}
+
+  $nextTick() {}
+  _render() {}
+}
+
+Vue.config
+Vue.options
+````

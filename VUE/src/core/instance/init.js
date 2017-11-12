@@ -64,6 +64,10 @@ export function initMixin (Vue: Class<Component>) {
     }
     // expose real self
     vm._self = vm
+    /**
+     * 挂载私有属性
+     * .$root .$parent .$children ._watcher ._isDestroyed ...
+     */
     initLifecycle(vm)
     initEvents(vm)
     initRender(vm)
