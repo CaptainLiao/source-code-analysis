@@ -105,7 +105,6 @@ vm.b = 2
     initState(vm)
     initProvide(vm) // resolve provide after data/props
     callHook(vm, 'created')
-
   }
 ````
 oh yeah,so easy! `_init`无非就是合并了`options`，再进行一系列初始化操作。又由于我们关注的是数据的响应，所以我们把重点放在`initState(vm)上。
@@ -131,6 +130,3 @@ function initData (vm: Component) {
 }
 ````
 看来，初始化数据的关键之一就是执行`observe(data, true)`了。那么，`observe`是什么？它是如何**观察**`data`的呢？
-
-#### observer
-
