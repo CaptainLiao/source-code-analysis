@@ -2,8 +2,8 @@
 说罢，万丈金光从`Vue`身上迸发而出，场面一度失控。待金光散去，`Vue`却不见了，只留下一本《Vue 修炼秘决》...
 
 开篇道：
-> 天下武功，唯坚不破唯快不破
-  待参透：var vm = new Vue(data:{a:1}})之时，即武功大成之日。
+> 天下武功，唯坚不破唯快不破。
+待参透：var vm = new Vue(data:{a:1}})之时，即武功大成之日。
 
 如你所见，`/core`文件夹下便是`Vue`的核心了，`/core/index.js`是整个内核的开篇，你先熟悉下：
 ````
@@ -28,7 +28,7 @@ renderMixin(Vue)
 ````
 class Vue {
   _data: any
-  
+
   constructor(options) {
     this.init(options)
   }
