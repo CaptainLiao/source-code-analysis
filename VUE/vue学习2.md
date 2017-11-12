@@ -97,7 +97,6 @@ vm.b = 2
       options || {},
       vm
     )
-
     initLifecycle(vm)
     initEvents(vm)
     initRender(vm)
