@@ -10,6 +10,7 @@ let uid = 0
  * directives subscribing to it.
  */
 // dep 是一个可被多个指令订阅的可观察对象
+// 收集依赖、订阅watcher、触发更新
 export default class Dep {
   static target: ?Watcher;
   id: number;
