@@ -27,6 +27,8 @@ renderMixin(Vue)
 完整的 `Vue` 对象（来自core/instance/index.js）
 ````
 class Vue {
+  _data: any
+  
   constructor(options) {
     this.init(options)
   }
@@ -130,3 +132,4 @@ function initData (vm: Component) {
 }
 ````
 看来，初始化数据的关键之一就是执行`observe(data, true)`了。那么，`observe`是什么？它是如何**观察**`data`的呢？
+

@@ -32,6 +32,8 @@ export const observerState = {
  * object's property keys into getter/setters that
  * collect dependencies and dispatches updates.
  */
+// 每个被观察的对象都是一个 Observer 类的实例，Observer 将被观察对象的每个
+// 属性转换为一个能够收集依赖和触发更新的getter/setter对象。
 export class Observer {
   value: any;
   dep: Dep;
