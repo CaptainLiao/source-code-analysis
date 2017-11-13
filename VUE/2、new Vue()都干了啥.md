@@ -1,10 +1,22 @@
-## 第二章 修炼`Vue`大法
+## 第二章 《Vue 编程房内考》
 
-开篇道：
-> 天下武功，唯坚不破唯快不破。
-待参透：var vm = new Vue(data:{a:1}})之时，即武功大成之日。
+待参透以下代码之时，即Vue心法大成之日。
+````
+var vm = new Vue({
+  data:{
+  a:1
+  }
+})
+// `vm.a` 是响应的
+vm.b = 2
+// `vm.b` 是非响应的
+````
+*旁白：主线2——数据响应系统*
 
-如你所见，`/core`文件夹下便是`Vue`的核心了，`/core/index.js`是整个内核的开篇，你先熟悉下：
+### 第一回 再识`Vue`
+`new Vue({})`对你而言再简单不过了，那么，在实例化的过程中，`Vue`进行了哪些变化呢？你细细思索，明白关键在还在**构造函数Vue**上。
+
+/core/index.js
 ````
 function Vue (options) {
   if (process.env.NODE_ENV !== 'production' &&
@@ -20,8 +32,8 @@ eventsMixin(Vue)
 lifecycleMixin(Vue)
 renderMixin(Vue)
 ````
-### 起手式
-`new Vue(options)`是使用`Vue`的起手式，`this._init(options)`是蓄势过程。此时你可能会疑惑，`this._init()`你之前并没有见过，它从哪里来，它能干什么？不着急，我们一步一步往下看。
+
+`new Vue(options)`时，会执行`this._init(options)`。此时你有点小疑惑，`this._init()`之前并没有见过，它从哪里来，它能干什么？顺着`core/index.js`的执行过程——初始混合(initMixin) -> 状态混合(stateMixin) -> ... -> 渲染混合(renderMixin)，你终于窥到了`Vue`的全貌：
 
 完整的 `Vue` 对象（来自core/instance/index.js）
 ````
@@ -71,23 +83,7 @@ class Vue {
 Vue.config
 Vue.options
 ````
-
-### 核心，`Vue`响应式系统
-
-这次我们换个思路，带着问题找答案。有如下代码：
-````
-var vm = new Vue({
-  data:{
-  a:1
-  }
-})
-// `vm.a` 是响应的
-vm.b = 2
-// `vm.b` 是非响应的
-````
-问题来了，为什么`vm.a`是响应的而`vm.b`是非响应的呢？我们把问题概括为：**`Vue`的数据是如何响应的？**一定要牢记这一点。
-
-我们已经知道，当实例化一个`Vue`对象的时候，会执行`_init()`，这期间`Vue`做了什么呢？让我们打开`src/core/instance/init.js`一窥究竟：
+此时，`this._init(options)`自然而然的浮现在你的面前：
 ````
   Vue.prototype._init = function (options?: Object) {
 
@@ -108,7 +104,9 @@ vm.b = 2
     callHook(vm, 'created')
   }
 ````
-oh yeah,so easy! `_init`无非就是合并了`options`，再进行一系列初始化操作。又由于我们关注的是数据的响应，所以我们把重点放在`initState(vm)上。
+
+### 初探`Vue`响应式系统
+oh yeah, so easy! `_init`无非就是合并了`options`，再进行一系列初始化操作。又由于我们的任务是关注数据(data)的变化，所以我们把重点放在`initState(vm)上。
 ````
 export function initState (vm: Component) {
   vm._watchers = []
@@ -125,10 +123,9 @@ function initData (vm: Component) {
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
     : data || {}
-
-  // observe data
   observe(data, true /* asRootData */)
 }
 ````
 看来，初始化数据的关键之一就是执行`observe(data, true)`了。那么，`observe`是什么？它是如何**观察**`data`的呢？
 
+#### 源码及注释：https://github.com/CaptainLiao/source-code-analysis/tree/master/VUE
