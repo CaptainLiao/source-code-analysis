@@ -105,8 +105,10 @@ Vue.options
   }
 ````
 
-### 初探`Vue`响应式系统
+### 第二回 初探`Vue`响应式系统
 oh yeah, so easy! `_init`无非就是合并了`options`，再进行一系列初始化操作。又由于我们的任务是关注数据(data)的变化，所以我们把重点放在`initState(vm)上。
+
+core/instance/state.js
 ````
 export function initState (vm: Component) {
   vm._watchers = []
@@ -126,6 +128,6 @@ function initData (vm: Component) {
   observe(data, true /* asRootData */)
 }
 ````
-看来，初始化数据的关键之一就是执行`observe(data, true)`了。那么，`observe`是什么？它是如何**观察**`data`的呢？
+看来，初始化数据的关键就是执行`observe(data, true)`了。那么，`observe`是什么？它是如何**观察**`data`的呢？
 
 #### 源码及注释：https://github.com/CaptainLiao/source-code-analysis/tree/master/VUE
