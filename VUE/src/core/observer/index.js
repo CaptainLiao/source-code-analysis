@@ -43,6 +43,7 @@ export class Observer {
     this.value = value
     this.dep = new Dep()
     this.vmCount = 0
+    // value其实就是vm._data, 即在vm._data上添加__ob__属性
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
       const augment = hasProto
@@ -51,6 +52,7 @@ export class Observer {
       augment(value, arrayMethods, arrayKeys)
       this.observeArray(value)
     } else {
+      // 遍历obj上的属性，将每个属性改为getter/setter实现
       this.walk(value)
     }
   }
@@ -138,6 +140,7 @@ export function defineReactive (
   customSetter?: ?Function,
   shallow?: boolean
 ) {
+  // dep记录了和这个value值的相关依赖
   const dep = new Dep()
 
   const property = Object.getOwnPropertyDescriptor(obj, key)
