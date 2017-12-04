@@ -18,7 +18,7 @@ export default function (Vue) {
   /**
    * Vuex init hook, injected into each instances init hooks list.
    */
-
+  // Vuex init钩子函数，注入到每个实例的init钩子列表中
   function vuexInit () {
     const options = this.$options
     // store injection

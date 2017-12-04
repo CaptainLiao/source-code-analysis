@@ -2,8 +2,14 @@ import Module from './module'
 import { assert, forEachValue } from '../util'
 
 export default class ModuleCollection {
+  /**
+   * Creates an instance of ModuleCollection.
+   * @param {any} rawRootModule(原始根模块) new Vues.store(rawRootModule)
+   * @memberof ModuleCollection
+   */
   constructor (rawRootModule) {
-    // register root module (Vuex.Store options)
+    // 注册根module
+    // 注册完成后，this.root = newModule;
     this.register([], rawRootModule, false)
   }
 
@@ -26,11 +32,16 @@ export default class ModuleCollection {
   }
 
   register (path, rawModule, runtime = true) {
-    if (process.env.NODE_ENV !== 'production') {
-      assertRawModule(path, rawModule)
-    }
 
+    /**
+     * newModule有以下属性:
+     * runtime = runtime
+     * _children = Object.create(null)
+     * _rawModule = rawModule
+     * state = rawModule.state
+     */
     const newModule = new Module(rawModule, runtime)
+
     if (path.length === 0) {
       this.root = newModule
     } else {
@@ -38,7 +49,7 @@ export default class ModuleCollection {
       parent.addChild(path[path.length - 1], newModule)
     }
 
-    // register nested modules
+    // 注册嵌套模块
     if (rawModule.modules) {
       forEachValue(rawModule.modules, (rawChildModule, key) => {
         this.register(path.concat(key), rawChildModule, runtime)

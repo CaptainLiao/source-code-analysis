@@ -5,19 +5,22 @@ import { forEachValue, isObject, isPromise, assert } from './util'
 
 let Vue // bind on install
 
+// Store 构造器
 export class Store {
   constructor (options = {}) {
-    // Auto install if it is not done yet and `window` has `Vue`.
-    // To allow users to avoid auto-installation in some cases,
-    // this code should be placed here. See #731
-    // 此段代码作用是保证Vue存在且安装正确
+
+    // 此段代码作用是保证 store 正确的注入到vue.mixin中
     if (!Vue && typeof window !== 'undefined' && window.Vue) {
+      // 在 beforeCreate 钩子中，将$store属性挂载到Vue的原型上（Vue.prototype.$store）
       install(window.Vue)
     }
 
     if (process.env.NODE_ENV !== 'production') {
+      // 在store实例生成前，必须调用Vue.use(Vuex)
       assert(Vue, `must call Vue.use(Vuex) before creating a store instance.`)
+      // Vuex要求浏览器使用promise
       assert(typeof Promise !== 'undefined', `vuex requires a Promise polyfill in this browser.`)
+      // 必须通过new操作符生成store实例
       assert(this instanceof Store, `Store must be called with the new operator.`)
     }
 
@@ -26,18 +29,26 @@ export class Store {
       strict = false
     } = options
 
-    // store internal state
+    // store 内部状态
     this._committing = false
     this._actions = Object.create(null)
     this._actionSubscribers = []
     this._mutations = Object.create(null)
     this._wrappedGetters = Object.create(null)
+    /**
+     * this._modules 指向 ModuleCollection的实例，而这个实例有一个root属性
+     * root下又挂载以下属性：
+     * runtime = true
+      _children = {}
+      _rawModule = options
+      state = options.state
+     */
     this._modules = new ModuleCollection(options)
     this._modulesNamespaceMap = Object.create(null)
     this._subscribers = []
     this._watcherVM = new Vue()
 
-    // bind commit and dispatch to self
+    // store实例绑定 commit 和 dispatch
     const store = this
     const { dispatch, commit } = this
     this.dispatch = function boundDispatch (type, payload) {
@@ -47,21 +58,18 @@ export class Store {
       return commit.call(store, type, payload, options)
     }
 
-    // strict mode
+    // 严格模式
     this.strict = strict
 
     const state = this._modules.root.state
 
-    // init root module.
-    // this also recursively registers all sub-modules
-    // and collects all module getters inside this._wrappedGetters
+    // 初始化根模块，这会递归注册所有子模块，并收集在 this._wrappedGetters 中的所有模块getters
     installModule(this, state, [], this._modules.root)
 
-    // initialize the store vm, which is responsible for the reactivity
-    // (also registers _wrappedGetters as computed properties)
+    // 初始化负责响应变化的 store vm，同时注册作为计算属性的 _wrappedGetters
     resetStoreVM(this, state)
 
-    // apply plugins
+    // 应用插件
     plugins.forEach(plugin => plugin(this))
 
     if (Vue.config.devtools) {

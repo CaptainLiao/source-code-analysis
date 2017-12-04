@@ -1,6 +1,12 @@
 import { forEachValue } from '../util'
 
 export default class Module {
+  /**
+   * Creates an instance of Module.
+   * @param {any} rawModule 原始模块，取值来自 new Vuex.store(options)
+   * @param {any} runtime ture
+   * @memberof Module
+   */
   constructor (rawModule, runtime) {
     this.runtime = runtime
     this._children = Object.create(null)
