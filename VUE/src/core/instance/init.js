@@ -52,6 +52,8 @@ export function initMixin (Vue: Class<Component>) {
       //   directives,
       //   filters,
       //   options,
+      //   store
+      //   router
       //   vm
       // }
     }

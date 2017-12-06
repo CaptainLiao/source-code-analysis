@@ -7,6 +7,9 @@ import { toArray } from '../util/index'
 export function initUse (Vue: GlobalAPI) {
   // 插件 plugin 是一个函数或者对象
   Vue.use = function (plugin: Function | Object) {
+
+    // 变量 installedPlugins 指向 this._installedPlugins
+    // 即：如果动态改变（不是重新赋值） installedPlugins，this._installedPlugins 也会随之改变 
     const installedPlugins = (this._installedPlugins || (this._installedPlugins = []))
 
     // 阻止多次使用同一个插件
@@ -26,6 +29,7 @@ export function initUse (Vue: GlobalAPI) {
       plugin.apply(null, args)
     }
     // 此时 plugin 是一个对象
+    // this._installedPlugins 也一并发生变化
     installedPlugins.push(plugin)
     return this
   }

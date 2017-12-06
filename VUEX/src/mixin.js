@@ -2,6 +2,7 @@ export default function (Vue) {
   const version = Number(Vue.version.split('.')[0])
 
   if (version >= 2) {
+    // 在 Vue 的生命周期 beforeCreate 时执行 vuexInit 方法
     Vue.mixin({ beforeCreate: vuexInit })
   } else {
     // override init and inject vuex init procedure
@@ -20,6 +21,7 @@ export default function (Vue) {
    */
   // Vuex init钩子函数，注入到每个实例的init钩子列表中
   function vuexInit () {
+    // 执行 vuexInit 方法时， this 指向 Vue。
     const options = this.$options
     // store injection
     if (options.store) {

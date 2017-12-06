@@ -4,8 +4,9 @@ import { isServerRendering } from 'core/util/env'
 
 /**
  * 
- * 给 Vue 配置静态属性
- * .set, .confing, .options, .delete, .nextTick 等
+ * 给 Vue 配置静态属性及方法
+ * .set, .confing, .options, .delete, .nextTick, 
+ * .use(), .mixin() 等
  */
 initGlobalAPI(Vue)
 
