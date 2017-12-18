@@ -1,5 +1,6 @@
 /* @flow */
 
+// isDef === isDefined
 import { isDef } from 'shared/util'
 import { isAsyncPlaceholder } from './is-async-placeholder'
 
