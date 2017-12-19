@@ -90,7 +90,9 @@ export default {
     }
   },
 
+  // 渲染<keep-alive>组件时，执行render方法  
   render () {
+    // this 表示当前渲染的<keep-alive>组件
     // this.$slots.default 包含了所有没有被包含在具名插槽中的节点
     // 这里取得第一个子组件
     const vnode = getFirstComponentChild(this.$slots.default)

@@ -46,7 +46,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
 
 
   Vue.options = Object.create(null)
-  // options 有三个属性.components, .directives, .filters
+  // options 有三个属性 .components, .directives, .filters
   ASSET_TYPES.forEach(type => {
     Vue.options[type + 's'] = Object.create(null)
   })
@@ -55,6 +55,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   // components with in Weex's multi-instance scenarios.
   Vue.options._base = Vue
 
+  // 将builtInComponents对象拷贝到Vue.options.components 中
   extend(Vue.options.components, builtInComponents)
 
   initUse(Vue)
