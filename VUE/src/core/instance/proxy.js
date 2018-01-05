@@ -43,7 +43,11 @@ if (process.env.NODE_ENV !== 'production') {
     })
   }
 
+  // 过滤到对象上以`_`开头的属性
   const hasHandler = {
+    // has 方法用于拦截`hasProperty`操作，用来判断对象是否有某个属性或方法
+    // ps: `has`拦截的是`hasProperty`操作，而不是`hasOwnProperty`
+    // pps: 虽然`for...in`循环也用到了`in`运算符，但是`has`拦截对`for...in`循环不生效。
     has (target, key) {
       const has = key in target
       const isAllowed = allowedGlobals(key) || key.charAt(0) === '_'
@@ -65,7 +69,9 @@ if (process.env.NODE_ENV !== 'production') {
 
   initProxy = function initProxy (vm) {
     if (hasProxy) {
-      // determine which proxy handler to use
+      // 决定使用哪种 proxy handler
+      // options.render._withStripped 不知道是什么东西，搜索全局也没有找到
+      // 所以一般情况下，都是用 hasHandler
       const options = vm.$options
       const handlers = options.render && options.render._withStripped
         ? getHandler
