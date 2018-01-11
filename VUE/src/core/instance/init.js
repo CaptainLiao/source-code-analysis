@@ -41,7 +41,7 @@ export function initMixin (Vue: Class<Component>) {
     } else {
       // 给vm 挂载一个 $options属性，用来保存merge后的参数
       vm.$options = mergeOptions(
-        // vm.constructor 就是 function Vue(){}
+        // vm.constructor 在这里可看作是 function Vue(){}
         resolveConstructorOptions(vm.constructor),
         options || {},
         vm

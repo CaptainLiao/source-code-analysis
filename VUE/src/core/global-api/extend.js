@@ -24,7 +24,7 @@ export function initExtend (Vue: GlobalAPI) {
     const SuperId = Super.cid
     const cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {})
 
-    // 如果有缓存的构造函数，直接返回
+    // 如果有缓存的构造函数，直接返回子类 Sub
     if (cachedCtors[SuperId]) {
       return cachedCtors[SuperId]
     }
@@ -42,17 +42,22 @@ export function initExtend (Vue: GlobalAPI) {
 
     // Sub（是一个子类构造方法）用于初始化一个 Vue 组件
     const Sub = function VueComponent (options) {
+      // _init方法继承自Vue
+      // 执行后将 options，vm，Sub.options 合并挂在到vm.$options属性上
       this._init(options)
     }
     
     // 原型继承
     // Sub 继承于 Super（Super === Vue）
     Sub.prototype = Object.create(Super.prototype)
-    // 直接赋值的方式让 Sub 的 constructor 指向了 Super，所以这里要重写
+    // 原型继承的方式让 Sub 的 constructor 指向了 Super，所以这里要重写
     Sub.prototype.constructor = Sub
 
     // 添加静态属性
     Sub.cid = cid++
+
+    // 合并父类和子类参数
+    // Sub.options 在实例化Sub时，会将options统一挂载到vm.$options上
     Sub.options = mergeOptions(
       Super.options,
       extendOptions
