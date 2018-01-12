@@ -14,7 +14,15 @@ const idToTemplate = cached(id => {
   return el && el.innerHTML
 })
 
+/**
+ * 此处的 mount 引用自 './runtime/index'，只做 mountComponent(this, el, hydrating) ：
+ * 1 执行 render 方法得到 vnode
+ * 2 更新 vnode 到真实 dom 上
+ * 
+ */ 
 const mount = Vue.prototype.$mount
+
+// overwrite
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
@@ -30,11 +38,30 @@ Vue.prototype.$mount = function (
   }
 
   const options = this.$options
-  // resolve template/el and convert to render function
+  /**
+   * 当 options.render 不存在时，
+   * 处理模板template，并且将其编译为 render&staticRenderFns 函数后分别挂载到 options 上，
+   * 最后执行 mountComponent(this, el, hydrating)
+   * 
+   * vue-loader等预处理器 会将 .vue文件中的<template>转换为模板字符串，并作为options.template 值导出
+   * eg:
+   * some-file.vue有如下内容：
+   * <template>
+   *   <div>这是一个.vue组件</div>
+   * </template>
+   * 
+   * 经过vue-loader转化----->
+   * some-file.vue --> some-file.js:
+   * module.exports.options.template = "\n<div _v-028af462=\"\">这是一个.vue组件</div>\n"
+   * 
+   * 在实例化Vue时，options.template 作为参数传入，最终挂载到 this.$optons 上
+   */
   if (!options.render) {
+    // template 可对应上面的 "\n<div _v-028af462=\"\">这是一个.vue组件</div>\n"
     let template = options.template
     if (template) {
-      if (typeof template === 'string') {
+
+      if (typeof template === 'string') { // template 为字符串
         if (template.charAt(0) === '#') {
           template = idToTemplate(template)
           /* istanbul ignore if */
@@ -45,7 +72,7 @@ Vue.prototype.$mount = function (
             )
           }
         }
-      } else if (template.nodeType) {
+      } else if (template.nodeType) { // 当 template 为 dom 节点
         template = template.innerHTML
       } else {
         if (process.env.NODE_ENV !== 'production') {
@@ -53,7 +80,7 @@ Vue.prototype.$mount = function (
         }
         return this
       }
-    } else if (el) {
+    } else if (el) { // 不存在 template 且存在 element
       template = getOuterHTML(el)
     }
     if (template) {
@@ -62,6 +89,15 @@ Vue.prototype.$mount = function (
         mark('compile')
       }
 
+      /**
+       * 将 template 编译成 render 函数。
+       * compileToFunctions 回返回三个值：
+       * {  ast,
+       *    render,
+       *    staticRenderFns
+       * }
+       * staticRenderFns不需要在VNode更新时进行patch，优化性能
+       */
       const { render, staticRenderFns } = compileToFunctions(template, {
         shouldDecodeNewlines,
         delimiters: options.delimiters,
@@ -77,6 +113,7 @@ Vue.prototype.$mount = function (
       }
     }
   }
+  /* 执行 mountComponent(this, el, hydrating)  */
   return mount.call(this, el, hydrating)
 }
 

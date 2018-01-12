@@ -141,6 +141,11 @@ export function lifecycleMixin (Vue: Class<Component>) {
   }
 }
 
+/**
+ * 挂载组件：
+ * 1、执行 options.render()，得到 vnode
+ * 2、更新 vnode：vm._update(vnode)
+ */
 export function mountComponent (
   vm: Component,
   el: ?Element,
