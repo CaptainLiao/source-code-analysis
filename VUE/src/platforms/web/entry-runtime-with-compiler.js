@@ -15,6 +15,7 @@ const idToTemplate = cached(id => {
 })
 
 /**
+ * 缓存 $mount，等下会被 overwrite
  * 此处的 mount 引用自 './runtime/index'，只做 mountComponent(this, el, hydrating) ：
  * 1 执行 render 方法得到 vnode
  * 2 更新 vnode 到真实 dom 上
