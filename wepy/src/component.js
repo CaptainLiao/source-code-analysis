@@ -84,6 +84,7 @@ export default class {
     // 混合列表
     $mixins = [];
 
+    // 是不是组件？？
     $isComponent = true;
 
     // 定义需要添加的前缀
@@ -95,6 +96,7 @@ export default class {
     // 组件数据集
     data = {};
 
+    // 组件的方法
     methods = {};
 
     
