@@ -9,6 +9,7 @@ export function install (Vue) {
 
   _Vue = Vue
 
+  // 值已经定义了（not undefined）
   const isDef = v => v !== undefined
 
   const registerInstance = (vm, callVal) => {

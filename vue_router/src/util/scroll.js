@@ -39,6 +39,7 @@ export function handleScroll (
   // wait until re-render finishes before scrolling
   // 在滚动之前，需要等待重绘完成
   router.app.$nextTick(() => {
+    // 从 positionStore 对象中获取最新的position
     const position = getScrollPosition()
     const shouldScroll = behavior.call(router, to, from, isPop ? position : null)
 

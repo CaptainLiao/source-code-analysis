@@ -16,6 +16,7 @@ export class HTML5History extends History {
 
     if (supportsScroll) {
       // 监听 popstate 事件，保存positionStore = {x: nn, y: mm}
+      // 并且 setStateKey
       setupScroll()
     }
 
