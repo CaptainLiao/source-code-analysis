@@ -30,7 +30,9 @@ if (supportsScroll) {
 ````
 window.addEventListener('popstate', e => {
   this.transitionTo(location, route => {
-    handleScroll(router, route, current, true)
+    if (supportsScroll) {
+      handleScroll(router, route, current, true)
+    }
   })
 })
 ````
@@ -59,31 +61,48 @@ const scrollBehavior = (to, from, savedPosition) => {
   }
 };
 ````
-又，假设页面`A`第一次路由到页面`B`，且`A`路由的`keepAlive`为真，`B`不存在`keepAlive`。
+又，假设页面`A`第一次路由到页面`B`，再返回`A`，且`A`路由的`keepAlive`为真，`B`不存在`keepAlive`。
 
-以上是背景.....
+请详细描述整个路由的过程发生了什么？
 
-首先我们需要进入`A`页面，此时：
-（1）触发`popstate`事件执行`setupScroll`函数，即：
-  * 由系统生成一个`key`作为`positionStore`的属性，用来保存页面滚动的位置（此刻页面并没有滚动）；
-  * 将事件的`e.state.key`值覆盖由系统生成的`key`值；
-  * *参考：（一 ）路由变化，保存滚动的`position`。*
+---------------------割背景---------------------
 
-（2）再次触发`popstate`事件，这里才会真正的进入到`A`页面，成功后进行以下操作：
-  * 获取(1)中第二步生成的`key`，得到`positionStore[key]`的值，此时为`undefined`
-  * 执行`scrollBehavior(to, from, positionStore[key])`，返回`position`，此时`position.y=0;position.x=0`；
-  * 执行页面滚动`window.scrollTo(position.x, position.y)`。
+由题可知，`A、B`页面`supportsScroll`为都为真
 
-此时，因为`B`不存在`keepAlive`，所以只简单的进行页面跳转。
+**第一步：**首先我们需要进入`A`页面，此时页面并没有滚动，即滚动距离都为0：
+（1）触发`popstate`事件。
+  * 执行`setupScroll()`，即：
+    * 去全局中获取`key`，因不存在，这里由系统生成一个`key`作为`positionStore`的属性，用来保存页面滚动的位置；
+    * 将事件的`e.state.key`值**覆盖**由系统生成的`key`值（注意理解这句话）；
+    * *参考：（一 ）路由变化，保存滚动的`position`。*
 
-当我们点击浏览器返回按钮时，即从`B`跳转到`A`，此时：
+（2）再次触发`popstate`事件。
+  * 这里先执行`transitionTo()`进入到`A`页面，成功后执行回调进行以下操作：
+    * 获取(1)中生成的`key`，得到`positionStore[key]`的值，此时为`undefined`；
+    * 执行`scrollBehavior(to, from, positionStore[key])`，返回`position`。此时`A`页面的`document.body.scrollTop = 0`；
+    * 执行`window.scrollTo(0, 0)`，页面`A`滚动。
 
-（1）触发`popstate`事件执行`setupScroll`函数，即：
-  * 由系统生成一个`key`作为`positionStore`的属性，用来保存页面滚动的位置；
-  * 将事件的`e.state.key`值覆盖由系统生成的`key`值；
-  * *参考：（一 ）路由变化，保存滚动的`position`。*
+**第二步：**从`A`跳转到`B`，此时，
+（1）触发`popstate`事件。
+  * **此时仍然停留在`A`**；
+  * 执行`setupScroll()`，即：
+    * 去全局中获取`key`（第一步生成的`key`）作为`positionStore`的属性，用来保存`A`页面滚动的位置；
+    * 将事件的`e.state.key`值**覆盖**第一步生成的`key`值；
 
-（2）再次触发`popstate`事件，这里才会真正的跳转到`A`页面，成功后进行滚动操作：
-  * 获取(1)中第二步生成的`key`，得到`positionStore[key]`的值，此时为`undefined`
-  * 执行`scrollBehavior(to, from, positionStore[key])`，返回`position`。（此时`position.y`的值就等于`A`页面的`document.body.scrollTop`）。
-  * 执行`window.scrollTo(position.x, position.y)`，滚动到
+（2）再次触发`popstate`事件，
+  * **真正跳转到`B`**，成功后进行以下回调操作
+    * 获取第二步(1)中生成的`key`，得到`positionStore[key]`的值为`undefined`
+    * 执行`scrollBehavior(to, from, positionStore[key])`，返回`position`(因`keepAlive=false`所以position={x: 0, y: 0})。
+    * 执行`window.scrollTo(position.x, position.y)`，`B`页面滚动。
+
+**第三步：**当我们点击浏览器返回按钮时，即从`B`跳转到`A`，此时：
+（1）触发`popstate`事件。
+  * 执行`setupScroll()`，即：
+    * 获取第二步(1)中生成的`key`作为`positionStore`的属性，用来保存`B`页面滚动的位置；
+    * 将事件的`e.state.key`值**覆盖**第二步(1)中生成的`key`值。因为`A`未被销毁，所以这里的`key`和第一步(1)中生成的`key`相同；
+
+（2）再次触发`popstate`事件：
+  * **真正跳转到`A`**，成功后进行以下回调操作(`B`被销毁)
+    * 获取第三步(1)中生成的`key`，得到`positionStore[key]`的值为`A`上一次滚动的值
+    * 执行`scrollBehavior(to, from, positionStore[key])`，直接返回`positionStore[key]`
+    * `position = positionStore[key]`，执行`window.scrollTo(position.x, position.y)`，`A`页面滚动。

@@ -18,10 +18,10 @@ export function setupScroll () {
 }
 
 export function handleScroll (
-  router: Router,
-  to: Route,
-  from: Route,
-  isPop: boolean
+  router: Router, // router
+  to: Route, // route
+  from: Route, // current
+  isPop: boolean // true
 ) {
   if (!router.app) {
     return
