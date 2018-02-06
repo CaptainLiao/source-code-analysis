@@ -13,6 +13,7 @@ export function createRoute (
 ): Route {
   const stringifyQuery = router && router.options.stringifyQuery
 
+  // 并没有对参数进行 decodeURIComponent
   let query: any = location.query || {}
   try {
     query = clone(query)
