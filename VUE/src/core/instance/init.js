@@ -48,6 +48,8 @@ export function initMixin (Vue: Class<Component>) {
       )
       // 合并后的 vm.$options
       // vm.$options = {
+      //   mixins,
+      //   methods,
       //   components,
       //   directives,
       //   filters,
