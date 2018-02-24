@@ -350,6 +350,8 @@ function assertObjectType (name: string, value: any, vm: ?Component) {
 /**
  * Merge two option objects into a new one.
  * Core utility used in both instantiation and inheritance.
+ * 将两个option对象合并成一个新对象
+ * 用于实例化和继承的核心工具
  */
 export function mergeOptions (
   parent: Object,
@@ -397,6 +399,8 @@ export function mergeOptions (
  * Resolve an asset.
  * This function is used because child instances need access
  * to assets defined in its ancestor chain.
+ * 处理静态文件
+ * 使用此函数是因为 子实例需要访问定义在它祖先链上的静态文件
  */
 export function resolveAsset (
   options: Object,
