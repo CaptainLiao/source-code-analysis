@@ -91,12 +91,14 @@ Vue.prototype.$mount = function (
       }
 
       /**
-       * 将 template 编译成 render 函数。
-       * compileToFunctions 回返回三个值：
+       * 将 template 通过 compileToFunctions 函数编译。
+       * 返回一个对象：
        * {  ast,
        *    render,
        *    staticRenderFns
        * }
+       * 解构后挂载到 this.$options 上
+       * 
        * staticRenderFns不需要在VNode更新时进行patch，优化性能
        */
       const { render, staticRenderFns } = compileToFunctions(template, {

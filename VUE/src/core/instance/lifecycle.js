@@ -58,10 +58,10 @@ export function lifecycleMixin (Vue: Class<Component>) {
     const prevActiveInstance = activeInstance
     activeInstance = vm
     vm._vnode = vnode
-    // Vue.prototype.__patch__ is injected in entry points
+    // Vue.prototype.__patch__ is 在入口注入
     // based on the rendering backend used.
     if (!prevVnode) {
-      // initial render
+      // 首次渲染
       vm.$el = vm.__patch__(
         vm.$el, vnode, hydrating, false /* removeOnly */,
         vm.$options._parentElm,
@@ -69,9 +69,10 @@ export function lifecycleMixin (Vue: Class<Component>) {
       )
       // no need for the ref nodes after initial patch
       // this prevents keeping a detached DOM tree in memory (#5851)
+      // 首次 patch 后不再需要 ref nodes，防止内存一直保存已经删掉的 DOM 树
       vm.$options._parentElm = vm.$options._refElm = null
     } else {
-      // updates
+      // 更新
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
     activeInstance = prevActiveInstance
@@ -204,6 +205,8 @@ export function mountComponent (
 
   // manually mounted instance, call mounted on self
   // mounted is called for render-created child components in its inserted hook
+  // 手动挂载实例
+  // mounted 用于触发创建在子组件内部的渲染钩子函数
   if (vm.$vnode == null) {
     vm._isMounted = true
     callHook(vm, 'mounted')
