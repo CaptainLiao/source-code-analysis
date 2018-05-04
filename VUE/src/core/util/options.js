@@ -42,9 +42,8 @@ if (process.env.NODE_ENV !== 'production') {
   }
 }
 
-/**
- * Helper that recursively merges two data objects together.
- */
+
+// Helper，递归合并两个 data 对象 
 function mergeData (to: Object, from: ?Object): Object {
   if (!from) return to
   let key, toVal, fromVal
@@ -63,7 +62,7 @@ function mergeData (to: Object, from: ?Object): Object {
 }
 
 /**
- * Data
+ * merge data 或 fn
  */
 export function mergeDataOrFn (
   parentVal: any,
@@ -78,11 +77,13 @@ export function mergeDataOrFn (
     if (!parentVal) {
       return childVal
     }
-    // when parentVal & childVal are both present,
+    // when parentVal & childVal are both present, 
     // we need to return a function that returns the
     // merged result of both functions... no need to
     // check if parentVal is a function here because
     // it has to be a function to pass previous merges.
+
+    // 当 parentVal 和 childVal 都存在时，我们需要返回一个函数，它返回两个函数的 merge 结果
     return function mergedDataFn () {
       return mergeData(
         typeof childVal === 'function' ? childVal.call(this) : childVal,
@@ -389,6 +390,10 @@ export function mergeOptions (
     }
   }
   function mergeField (key) {
+    // options的data、钩子函数、对象，分属不同的合并策略:
+    // 数据对象在内部会进行浅合并 (一层属性深度)，在和组件的数据发生冲突时以组件数据优先。
+    // 同名钩子函数将混合为一个数组，因此都将被调用。另外，混入对象的钩子将在组件自身钩子之前调用。
+    // 值为对象的选项，例如 methods, components 和 directives，将被混合为同一个对象。两个对象键名冲突时，取组件对象的键值对。
     const strat = strats[key] || defaultStrat
     options[key] = strat(parent[key], child[key], vm, key)
   }
