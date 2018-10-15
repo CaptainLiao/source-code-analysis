@@ -93,22 +93,25 @@ export default {
   // 渲染<keep-alive>组件时，执行render方法  
   render () {
     // this 表示当前渲染的<keep-alive>组件
-    // this.$slots.default 包含了所有没有被包含在具名插槽中的节点
-    // 这里取得第一个子组件
+    // this.$slots.default 包含了所有非具名插槽节点
+    // 这里取得第一个子组件，因为进过包装的模板长这样： <keep-alive> <slot></slot> </keep-alive>
     const vnode = getFirstComponentChild(this.$slots.default)
     const componentOptions = vnode && vnode.componentOptions
 
     if (componentOptions) {
       // check pattern
       const name = getComponentName(componentOptions)
-      // 如果 componentName 没有作为keep-alive被包含进来，直接返回
+
+      // 组件有name字段,
+      //  如果name不在include中，或者name在exclude中，直接返回 vnode，即不进行keep-alive
       if (name && (
         (this.include && !matches(this.include, name)) ||
         (this.exclude && matches(this.exclude, name))
       )) {
         return vnode
       }
-
+      
+      // 对组件进行缓存
       const { cache, keys } = this
       const key = vnode.key == null
         // 相同的构造器（constructor）可能会注册为不同的本地组件，所以仅有一个 cid 是不够的（#3269）。
