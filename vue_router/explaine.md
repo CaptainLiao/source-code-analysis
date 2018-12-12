@@ -3,7 +3,13 @@ Vue.use(VueRouter):vue ---> VueRouter.install():void --> router.init()
 
 
 ## new VueRouter()
+
+### 简述：
+* 1、监听`pushState` 和 `popstate`事件，保存`window.pageXOffset window.pageYOffset`。src/utils/scroll & src/utils/push-state
+* 2、监听`popstate`事件，滚动到上一次保存的位置。 src/history
+
 ### （一）路由变化，保存滚动的`position`
+
 ````
 if (supportsScroll) {
   setupScroll()

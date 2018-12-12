@@ -47,12 +47,13 @@ export default class Watcher {
   ) {
     this.vm = vm
     vm._watchers.push(this)
-    // options
+    
     if (options) {
-      this.deep = !!options.deep
-      this.user = !!options.user
-      this.lazy = !!options.lazy
-      this.sync = !!options.sync
+      // watcher 有四种类型
+      this.deep = !!options.deep // 深度 watcher
+      this.user = !!options.user // 用户 watcher，缺省
+      this.lazy = !!options.lazy // 计算属性 watcher，原来叫 computed watcher，现在改成了 lazy watcher
+      this.sync = !!options.sync // 同步 watcher
     } else {
       this.deep = this.user = this.lazy = this.sync = false
     }

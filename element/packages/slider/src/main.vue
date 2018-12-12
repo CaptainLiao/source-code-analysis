@@ -7,46 +7,40 @@
      :aria-orientation="vertical ? 'vertical': 'horizontal'"
      :aria-disabled="disabled"
   >
-    <el-input-number
-      v-model="firstValue"
-      v-if="showInput && !range"
-      class="el-slider__input"
-      ref="input"
-      @change="$nextTick(emitChange)"
-      :step="step"
-      :disabled="disabled"
-      :controls="showInputControls"
-      :min="min"
-      :max="max"
-      :debounce="debounce"
-      size="small">
-    </el-input-number>
+
     <div class="el-slider__runway"
       :class="{ 'show-input': showInput, 'disabled': disabled }"
       :style="runwayStyle"
       @click="onSliderClick"
       ref="slider">
+
       <div
         class="el-slider__bar"
         :style="barStyle">
       </div>
+
       <slider-button
         :vertical="vertical"
         v-model="firstValue"
         ref="button1">
       </slider-button>
+
       <slider-button
         :vertical="vertical"
         v-model="secondValue"
         ref="button2"
         v-if="range">
       </slider-button>
-      <div
-        class="el-slider__stop"
-        v-for="item in stops"
-        :style="vertical ? { 'bottom': item + '%' } : { 'left': item + '%' }"
-        v-if="showStops">
-      </div>
+      
+      <template v-if="showStops">
+        <div
+          class="el-slider__stop"
+          v-for="item in stops"
+          :key="item"
+          style="vertical ? { 'bottom': item + '%' } : { 'left': item + '%' }">
+        </div>
+      </template>
+
     </div>
   </div>
 </template>

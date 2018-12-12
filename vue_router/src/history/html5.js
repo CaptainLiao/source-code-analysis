@@ -84,3 +84,16 @@ export function getLocation (base: string): string {
   }
   return (path || '/') + window.location.search + window.location.hash
 }
+
+function runQueue(queue, fn, cb) {
+  const step = index => {
+    if (index >= queue.length) return cb()
+
+    if (queue[index]) {
+      fn(queue[index], () => step(index + 1))
+    } else {
+      step(index + 1)
+    }
+  }
+  step(0)
+}
