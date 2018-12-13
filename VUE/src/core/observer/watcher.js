@@ -75,17 +75,9 @@ export default class Watcher {
       this.getter = parsePath(expOrFn)
       if (!this.getter) {
         this.getter = function () {}
-        process.env.NODE_ENV !== 'production' && warn(
-          `Failed watching path: "${expOrFn}" ` +
-          'Watcher only accepts simple dot-delimited paths. ' +
-          'For full control, use a function instead.',
-          vm
-        )
       }
     }
-    this.value = this.lazy
-      ? undefined
-      : this.get()
+    this.value = this.lazy ? undefined : this.get()
   }
 
   /**
@@ -239,6 +231,11 @@ export default class Watcher {
  * Recursively traverse an object to evoke all converted
  * getters, so that every nested property inside the object
  * is collected as a "deep" dependency.
+ * 
+ * 递归遍历一个对象，递归过程就是对对象内部属性的访问，就会触发它们的 getters，
+ * 于是，所有属性作为依赖被该对象的 watcher 收集，
+ * 这样，每当修改 watch 的对象内部属性，就会触发 watcher 的回调函数
+ * 
  */
 const seenObjects = new Set()
 function traverse (val: any) {

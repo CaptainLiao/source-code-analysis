@@ -184,11 +184,12 @@ function initComputed (vm: Component, computed: Object) {
 }
 
 export function defineComputed (
-  target: any,
-  key: string,
+  target,
+  key,
   userDef: Object | Function
 ) {
   const shouldCache = !isServerRendering()
+  
   if (typeof userDef === 'function') {
     sharedPropertyDefinition.get = shouldCache
       ? createComputedGetter(key)
@@ -196,7 +197,7 @@ export function defineComputed (
     sharedPropertyDefinition.set = noop
   } else {
     sharedPropertyDefinition.get = userDef.get
-      ? shouldCache && userDef.cache !== false
+      ? shouldCache && userDef.cache === true
         ? createComputedGetter(key)
         : userDef.get
       : noop
@@ -204,15 +205,7 @@ export function defineComputed (
       ? userDef.set
       : noop
   }
-  if (process.env.NODE_ENV !== 'production' &&
-      sharedPropertyDefinition.set === noop) {
-    sharedPropertyDefinition.set = function () {
-      warn(
-        `Computed property "${key}" was assigned to but it has no setter.`,
-        this
-      )
-    }
-  }
+
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
