@@ -292,7 +292,7 @@ var vm = new Vue({
   }
 })
 ````
-即在初始化完成后，fullName 的值为 undefined。当我们访问 fullName 的时候，会触发它的 getter，拿到计算属性对应的 watcher，执行`watcher.evaluate()`和`watcher.depend()`后，返回`watcher.value`，也就是最终的结果`Foo Bar`。
+即在初始化完成后，fullName 的值为 undefined。当 render 函数访问 fullName 的时候，才触发它的 getter，拿到计算属性对应的 watcher，执行`watcher.evaluate()`和`watcher.depend()`后，返回`watcher.value`，得到最终的结果`Foo Bar`。
 
 evaluate/depend 是 Watcher 类的原型方法：
 ````js
@@ -309,4 +309,12 @@ depend () {
   }
 }
 ````
+第一步，evaluate 执行当前 watcher 的 get() 方法：
+  * a.执行 pushTarget(this) ，这样会把 Dep.target 指向当前正在执行计算的 watcher。
+  * b.执行 this.getter() 得到结果，在本例中就是执行 function () {return this.firstName + ' ' + this.lastName}。
+第二步，收集当前 watcher 的依赖添加到 Dep.target 指向的 watcher 中
+
+值得注意的是，由于 firstName 和 lastName 都是响应式的，上面的 b 操作会触发这两个对象的 getter，这会把它们各自持有的 dep 添加到当前的 lazy watcher 中。
+
+
 

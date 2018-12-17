@@ -101,6 +101,7 @@ export default class Watcher {
       if (this.deep) {
         traverse(value)
       }
+      // 在执行 popTarget 之前，Dep.target 一直都指向当前的 watcher
       popTarget()
       this.cleanupDeps()
     }
@@ -199,6 +200,8 @@ export default class Watcher {
 
   /**
    * Depend on all deps collected by this watcher.
+   * 收集当前这个 watcher 的所有依赖
+   * 本质是把依赖都存入 Dep.target 指向的那个 watcher 中
    */
   depend () {
     let i = this.deps.length

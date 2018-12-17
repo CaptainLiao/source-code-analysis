@@ -10,7 +10,7 @@ let uid = 0
  * directives subscribing to it.
  */
 // dep 是一个可被多个指令订阅的可观察对象
-// 收集依赖、订阅watcher、触发更新
+// 收集依赖、订阅 watcher、触发 watcher 更新
 export default class Dep {
   static target: ?Watcher;
   id: number;
@@ -47,6 +47,9 @@ export default class Dep {
 // the current target watcher being evaluated.
 // this is globally unique because there could be only one
 // watcher being evaluated at any time.
+
+// Dep.target 指向当前目标的 watcher，全局唯一
+// 因为任何时候，正在执行的 watcher 都只有一个
 Dep.target = null
 const targetStack = []
 
