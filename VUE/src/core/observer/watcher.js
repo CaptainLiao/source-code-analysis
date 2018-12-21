@@ -103,7 +103,7 @@ export default class Watcher {
       }
       // 在执行 popTarget 之前，Dep.target 一直都指向当前的 watcher
       popTarget()
-      this.cleanupDeps()
+      this.cleanupDeps()this.cleanupDeps()
     }
     return value
   }
@@ -137,6 +137,7 @@ export default class Watcher {
     this.depIds = this.newDepIds
     this.newDepIds = tmp
     this.newDepIds.clear()
+
     tmp = this.deps
     this.deps = this.newDeps
     this.newDeps = tmp

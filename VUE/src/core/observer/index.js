@@ -33,7 +33,7 @@ export const observerState = {
  * collect dependencies and dispatches updates.
  */
 // 每个被观察的对象都是一个 Observer 类的实例，Observer 将被观察对象的每个
-// 属性转换为一个能够收集依赖和触发更新的getter/setter对象。
+// 属性转换为一个能够收集依赖(getter)和触发更新(setter)的响应式对象。
 export class Observer {
   value: any;
   dep: Dep;
@@ -43,8 +43,10 @@ export class Observer {
     this.value = value
     this.dep = new Dep()
     this.vmCount = 0
-    // value其实就是vm._data, 即在vm._data上添加__ob__属性
+    // 通过 Object.defineProperty 把 this 赋值给 [value].__ob__
+    // __ob__ 递归指向这个 Observer 实例
     def(value, '__ob__', this)
+
     if (Array.isArray(value)) {
       const augment = hasProto
         ? protoAugment

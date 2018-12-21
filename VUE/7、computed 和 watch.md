@@ -10,10 +10,12 @@ watch 侦听属性，响应被监听数据的变化。当需要在数据变化�
 
 注意：*删除了代码警告，使用 web 运行环境*
 
-**前置条件：**
-定义在 VUE 中的响应式对象:
-* 访问则收集依赖：get -> dep.depend() -> watcher.addDep()，
-* 赋值则触发更新：set -> dep.notify() -> watcher.update()。
+**什么是响应式对象**
+通过 Object.defineProperty 重新定义某对象的 getter 和 setter，以实现：
+* 访问其属性触发 getter，收集依赖：get -> dep.depend() -> watcher.addDep()，
+* 修改其属性执行 setter，通知更新：set -> dep.notify() -> watcher.update()。
+
+我们称之为响应式对象，详见 defineReactive 函数。
 
 ### computed 初始化
 
@@ -328,8 +330,10 @@ update () {
   if (this.lazy) {
     this.dirty = true
   } else if (this.sync) {
+    // 在当前 tick 中执行 watcher.run()
     this.run()
   } else {
+    // 将 watcher 推入到待执行队列中，在下一个 tick 中执行 watcher.run()
     queueWatcher(this)
   }
 }
