@@ -99,9 +99,15 @@ function createComputedGetter (key) {
   }
 }
 ````
-createComputedGetter 返回函数 computedGetter，它就是计算属性对应的 getter。
+createComputedGetter 返回函数 computedGetter，它就是计算属性对应的 getter。到此，计算属性的初始化就完成了。
 
-到此，计算属性的初始化就完成了。
+#### computed 依赖收集和更新
+
+我们再进一步看看执行 computed getter() 会做哪些事情，假设 `getter() { return this.firstName + ' ' + this.lastName }`
+
+首先，执行 watcher.evaluate()，得到getter返回的值，完成后 watcher.dirty 置为 false。这样就缓存了计算属性的值。
+
+由于`this.firstName`和`this.firstName`也是响应式对象，这里会触发它们的 getter，于是，它们会把自己各自持有的 dep 加入到 Dep.target（defineReactive中有定义）, 也就是当前的 computed watcher。同时，在 watcher 的 addDep(dep) 方法内，会将当前这个 watcher 加入到 dep 的观察者列表中，一旦对象值发生变化，就会触发 dep.notify()，通知每个 watcher 更新。
 
 ### watch 初始化
 监听/侦听属性的初始化发生在`src/core/instance/state`中的`initWatch (vm, watch)`方法内：
@@ -148,7 +154,7 @@ $watch 和 initWatch 定义在同一个文件中：
   Vue.prototype.$watch = function (
     expOrFn,
     cb
-    options
+    options  
   ) {
     const vm: Component = this
     if (isPlainObject(cb)) return createWatcher(vm, expOrFn, cb, options)
@@ -168,7 +174,7 @@ $watch 和 initWatch 定义在同一个文件中：
 ````
 如果 cb 是一个对象，那么 return createWatcher()。这是因为定义在 VUE 原型上的 $watch 方法可以被用户直接调用，传入的回调 cb 可以是任意类型(函数、对象、字符串)。
 
-否则，设置 options.user = true，并实例化一个 watcher，可以称它为`user watcher`。这样，一旦 watch 的值发生变化，就会执行 cb，如果参数中 immediate 为真，还会先执行一次 cb。
+否则，设置 options.user = true，并实例化一个 watcher，并执行一次 get()，用于收集依赖、将当前这个 watcher 加入到自己内部 dep 的观察者列表中。这样，一旦 watch 的值发生变化，就会触发该watcher update() -> run()-> cb()，如果参数中 immediate 为真，还会先执行一次 cb。
 
 最后，返回 unwatchFn 函数，它调用 watcher 的 teardown 方法来移除这个 wacher。
 

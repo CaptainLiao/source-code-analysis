@@ -647,6 +647,8 @@ export function createPatchFunction (backend) {
         // patch existing root node
         patchVnode(oldVnode, vnode, insertedVnodeQueue, removeOnly)
       } else {
+        // vue ssr 会挂载真实的 dom 元素，需要将原始dom转化为 vnode，这一过程就是 hydrate
+        // https://www.zhihu.com/question/66068748
         if (isRealElement) {
           // mounting to a real element
           // check if this is server-rendered content and if we can perform
